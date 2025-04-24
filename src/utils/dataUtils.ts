@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Animal, Pen, Lot, Treatment, TreatmentFormData } from '../types';
 
@@ -208,10 +207,8 @@ export const getTreatmentsByDiagnosisId = async (diagnosisId: string): Promise<T
 
 export const saveTreatment = async (animalId: string, formData: TreatmentFormData): Promise<boolean> => {
   try {
-    // Using a type assertion to work around the TypeScript error
-    // This allows us to insert into the animal_treatments table even though it's not in the types yet
     const { error } = await supabase
-      .from('animal_treatments' as any)
+      .from('animal_treatments')
       .insert({
         animal_id: animalId,
         diagnosis_id: formData.diagnosisId,

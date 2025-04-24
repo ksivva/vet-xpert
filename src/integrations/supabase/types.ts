@@ -9,6 +9,74 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      animal_treatments: {
+        Row: {
+          animal_id: string
+          created_at: string
+          current_weight: number | null
+          diagnosis_id: string
+          id: string
+          moved_to_pen_id: string | null
+          severity: string
+          treatment_date: string
+          treatment_id: string
+          treatment_person: string
+        }
+        Insert: {
+          animal_id: string
+          created_at?: string
+          current_weight?: number | null
+          diagnosis_id: string
+          id?: string
+          moved_to_pen_id?: string | null
+          severity: string
+          treatment_date: string
+          treatment_id: string
+          treatment_person: string
+        }
+        Update: {
+          animal_id?: string
+          created_at?: string
+          current_weight?: number | null
+          diagnosis_id?: string
+          id?: string
+          moved_to_pen_id?: string | null
+          severity?: string
+          treatment_date?: string
+          treatment_id?: string
+          treatment_person?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "animal_treatments_animal_id_fkey"
+            columns: ["animal_id"]
+            isOneToOne: false
+            referencedRelation: "animals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "animal_treatments_diagnosis_id_fkey"
+            columns: ["diagnosis_id"]
+            isOneToOne: false
+            referencedRelation: "diagnoses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "animal_treatments_moved_to_pen_id_fkey"
+            columns: ["moved_to_pen_id"]
+            isOneToOne: false
+            referencedRelation: "pens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "animal_treatments_treatment_id_fkey"
+            columns: ["treatment_id"]
+            isOneToOne: false
+            referencedRelation: "treatments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       animals: {
         Row: {
           days_on_feed: number
