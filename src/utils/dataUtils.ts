@@ -1,5 +1,6 @@
+
 import { supabase } from "@/integrations/supabase/client";
-import { Animal, Pen, Lot, Treatment } from '../types';
+import { Animal, Pen, Lot, Treatment, TreatmentFormData } from '../types';
 
 export const getAnimalById = async (id: string): Promise<Animal | null> => {
   const { data, error } = await supabase
@@ -166,27 +167,83 @@ export const getLotByPenId = async (penId: string): Promise<Lot | null> => {
 };
 
 export const getTreatmentsByDiagnosisId = async (diagnosisId: string): Promise<Treatment[]> => {
-  const { data, error } = await supabase
-    .from('treatment_diagnoses')
-    .select(`
-      treatment_id,
-      treatments (*)
-    `)
-    .eq('diagnosis_id', diagnosisId);
+  // Check if we're using mock data (non-UUID strings)
+  if (diagnosisId && !diagnosisId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    console.log('Using mock treatments data for diagnosis:', diagnosisId);
+    // Return mock data for development
+    return [
+      { id: 'treat1', name: 'Treatment A', diagnosisIds: [diagnosisId] },
+      { id: 'treat2', name: 'Treatment B', diagnosisIds: [diagnosisId] },
+      { id: 'treat3', name: 'Treatment C', diagnosisIds: [diagnosisId] }
+    ];
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('treatment_diagnoses')
+      .select(`
+        treatment_id,
+        treatments (*)
+      `)
+      .eq('diagnosis_id', diagnosisId);
+      
+    if (error) {
+      console.error('Error fetching treatments:', error);
+      return [];
+    }
     
-  if (error) {
-    console.error('Error fetching treatments:', error);
+    if (!data || data.length === 0) return [];
+    
+    // Map each treatment and add the diagnosisId
+    return data.map(item => ({
+      id: item.treatments.id,
+      name: item.treatments.name,
+      diagnosisIds: [diagnosisId] // We only know this diagnosis ID from this query
+    }));
+  } catch (error) {
+    console.error('Exception fetching treatments:', error);
     return [];
   }
-  
-  if (!data) return [];
-  
-  // Map each treatment and add the diagnosisId
-  return data.map(item => ({
-    id: item.treatments.id,
-    name: item.treatments.name,
-    diagnosisIds: [diagnosisId] // We only know this diagnosis ID from this query
-  }));
+};
+
+export const saveTreatment = async (animalId: string, formData: TreatmentFormData): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('animal_treatments')
+      .insert({
+        animal_id: animalId,
+        diagnosis_id: formData.diagnosisId,
+        treatment_id: formData.treatmentId,
+        treatment_person: formData.treatmentPerson,
+        current_weight: formData.currentWeight ? parseFloat(formData.currentWeight) : null,
+        severity: formData.severity,
+        treatment_date: formData.date,
+        moved_to_pen_id: formData.moveTo
+      });
+      
+    if (error) {
+      console.error('Error saving treatment:', error);
+      return false;
+    }
+    
+    // Update animal's pen if moved
+    if (formData.moveTo) {
+      const { error: updateError } = await supabase
+        .from('animals')
+        .update({ pen_id: formData.moveTo })
+        .eq('id', animalId);
+        
+      if (updateError) {
+        console.error('Error updating animal pen:', updateError);
+        // We still return true as the treatment was saved
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Exception saving treatment:', error);
+    return false;
+  }
 };
 
 export const formatCurrency = (value: number): string => {

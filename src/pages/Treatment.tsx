@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import Layout from '../components/Layout';
 import SelectField from '../components/SelectField';
-import { getAnimalById, getTreatmentsByDiagnosisId } from '../utils/dataUtils';
+import { getAnimalById, getTreatmentsByDiagnosisId, saveTreatment } from '../utils/dataUtils';
 import { diagnoses, treatments, pens, currentUser } from '../data/mockData';
 import { TreatmentFormData, Severity, Treatment, Animal } from '../types';
 import { useQuery } from '@tanstack/react-query';
@@ -13,6 +13,7 @@ const TreatmentPage: React.FC = () => {
   const { animalId } = useParams<{ animalId: string }>();
   const navigate = useNavigate();
   const [availableTreatments, setAvailableTreatments] = useState<Treatment[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState<TreatmentFormData>({
     diagnosisId: '',
@@ -48,7 +49,7 @@ const TreatmentPage: React.FC = () => {
       if (formData.diagnosisId) {
         try {
           const treatments = await getTreatmentsByDiagnosisId(formData.diagnosisId);
-          setAvailableTreatments(treatments);
+          setAvailableTreatments(treatments || []);
           
           // Clear treatment selection if not in filtered list
           if (formData.treatmentId && !treatments.some(t => t.id === formData.treatmentId)) {
@@ -74,7 +75,7 @@ const TreatmentPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate form
@@ -83,14 +84,28 @@ const TreatmentPage: React.FC = () => {
       return;
     }
     
-    // In a real app, this would save the treatment to the database
-    console.log('Saving treatment:', {
-      animalId,
-      ...formData
-    });
+    if (!animalId) {
+      toast.error('Animal ID is missing');
+      return;
+    }
     
-    toast.success('Treatment saved successfully');
-    navigate('/');
+    setIsSubmitting(true);
+    
+    try {
+      const success = await saveTreatment(animalId, formData);
+      
+      if (success) {
+        toast.success('Treatment saved successfully');
+        navigate('/');
+      } else {
+        toast.error('Failed to save treatment');
+      }
+    } catch (error) {
+      console.error('Error in treatment submission:', error);
+      toast.error('An error occurred while saving the treatment');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoadingAnimal) {
@@ -147,12 +162,14 @@ const TreatmentPage: React.FC = () => {
             id="treatment"
             label="Treatment"
             value={formData.treatmentId}
-            options={availableTreatments.map(treat => ({
-              value: treat.id,
-              label: treat.name
-            }))}
+            options={availableTreatments && availableTreatments.length > 0 ? 
+              availableTreatments.map(treat => ({
+                value: treat.id,
+                label: treat.name
+              })) : []
+            }
             onChange={(value) => handleChange('treatmentId', value)}
-            disabled={!formData.diagnosisId}
+            disabled={!formData.diagnosisId || availableTreatments.length === 0}
             required
           />
           
@@ -228,8 +245,9 @@ const TreatmentPage: React.FC = () => {
             <button
               type="submit"
               className="btn-primary w-full"
+              disabled={isSubmitting}
             >
-              Save Treatment
+              {isSubmitting ? 'Saving...' : 'Save Treatment'}
             </button>
           </div>
         </form>
