@@ -10,8 +10,12 @@ import { toast } from 'sonner';
 
 const Index: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedLotId, setSelectedLotId] = useState<string>('');
-  const [selectedPenId, setSelectedPenId] = useState<string>('');
+  const [selectedLotId, setSelectedLotId] = useState<string>(() => 
+    localStorage.getItem('selectedLotId') || ''
+  );
+  const [selectedPenId, setSelectedPenId] = useState<string>(() => 
+    localStorage.getItem('selectedPenId') || ''
+  );
   const [filteredAnimals, setFilteredAnimals] = useState<Animal[]>([]);
 
   // Fetch lots
@@ -91,10 +95,20 @@ const Index: React.FC = () => {
     fetchAnimals();
   }, [selectedLotId, selectedPenId]);
 
+  // Update localStorage when selections change
+  useEffect(() => {
+    localStorage.setItem('selectedLotId', selectedLotId);
+  }, [selectedLotId]);
+
+  useEffect(() => {
+    localStorage.setItem('selectedPenId', selectedPenId);
+  }, [selectedPenId]);
+
   // Handle lot selection
   const handleLotChange = (lotId: string) => {
     setSelectedLotId(lotId);
     setSelectedPenId('');
+    localStorage.removeItem('selectedPenId'); // Clear pen when lot changes
   };
 
   // Handle pen selection

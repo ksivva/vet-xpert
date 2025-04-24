@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Arrow } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Animal } from '../types';
 import { formatCurrency, getWeekCount } from '../utils/dataUtils';
 
@@ -55,21 +54,7 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal, onClick }) => {
             }}
           >
             Start Treatment
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="16" 
-              height="16" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              className="ml-1 text-blue-600"
-            >
-              <path d="M5 12h14"/>
-              <path d="m12 5 7 7-7 7"/>
-            </svg>
+            <ArrowRight className="ml-1 text-blue-600" size={16} />
           </button>
         </div>
       </div>
@@ -78,4 +63,3 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal, onClick }) => {
 };
 
 export default AnimalCard;
-

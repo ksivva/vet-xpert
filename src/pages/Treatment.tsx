@@ -130,7 +130,6 @@ const TreatmentPage: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      // Set a default treatment person (can be updated later if needed)
       const success = await saveTreatment(animalId, {
         ...formData,
         treatmentPerson: 'system'
@@ -138,7 +137,16 @@ const TreatmentPage: React.FC = () => {
       
       if (success) {
         toast.success('Treatment saved successfully');
-        navigate('/');
+        // Reset form instead of navigating away
+        setFormData({
+          diagnosisId: '',
+          treatmentId: '',
+          treatmentPerson: '',
+          currentWeight: '',
+          severity: 'Medium' as Severity,
+          date: new Date().toISOString().split('T')[0],
+          moveTo: ''
+        });
       } else {
         toast.error('Failed to save treatment');
       }
@@ -177,7 +185,7 @@ const TreatmentPage: React.FC = () => {
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-semibold">Animal Details</h2>
             <span className={`px-3 py-1 rounded-full text-white ${
-              animal.pulls > 0 ? 'bg-yellow-500' : 'bg-green-500'
+              animal.pulls > 0 ? 'bg-blue-500' : 'bg-green-500'
             }`}>
               {animal.pulls > 0 ? `Pulls: ${animal.pulls}` : 'No Pulls'}
             </span>
@@ -188,33 +196,7 @@ const TreatmentPage: React.FC = () => {
         </div>
         
         <div className="mt-4 pt-3 border-t">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2">
-            <p className="text-blue-600 text-sm">ReTreatments: {animal.reTreat}</p>
-            <button 
-              className="text-blue-600 hover:underline text-sm flex items-center"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onClick) onClick();
-              }}
-            >
-              Start Treatment
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="16" 
-                height="16" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                className="ml-1 text-blue-600"
-              >
-                <path d="M5 12h14"/>
-                <path d="m12 5 7 7-7 7"/>
-              </svg>
-            </button>
-          </div>
+          <p className="text-blue-600 text-sm">ReTreatments: {animal.re_treat}</p>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
