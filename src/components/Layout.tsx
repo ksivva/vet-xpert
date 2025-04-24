@@ -1,7 +1,9 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Logo from './Logo';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from "sonner";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -16,6 +18,45 @@ const Layout: React.FC<LayoutProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Development authentication helper - auto signs in with development account
+  useEffect(() => {
+    const checkAndSignIn = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        try {
+          // Try to sign in with anonymous access for development
+          const { error } = await supabase.auth.signInWithPassword({
+            email: 'dev@vetxpert.com',
+            password: 'devpassword123'
+          });
+          
+          if (error) {
+            // If the user doesn't exist yet, let's create one
+            if (error.message.includes('Invalid login credentials')) {
+              const { error: signupError } = await supabase.auth.signUp({
+                email: 'dev@vetxpert.com',
+                password: 'devpassword123'
+              });
+              
+              if (!signupError) {
+                toast.success("Development account created and signed in");
+              } else {
+                console.error("Failed to create dev account:", signupError);
+              }
+            } else {
+              console.error("Authentication error:", error);
+            }
+          }
+        } catch (err) {
+          console.error("Authentication error:", err);
+        }
+      }
+    };
+
+    checkAndSignIn();
+  }, []);
 
   const handleBack = () => {
     navigate(-1);
