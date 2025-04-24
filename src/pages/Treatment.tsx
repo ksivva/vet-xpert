@@ -231,7 +231,7 @@ const TreatmentPage: React.FC = () => {
                   type="button"
                   className={`py-2 px-4 border rounded-md transition-all ${
                     formData.severity === severity 
-                      ? 'bg-vetxpert-purple text-white border-vetxpert-purple' 
+                      ? 'bg-vetxpert-primary text-white border-vetxpert-primary' 
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                   }`}
                   onClick={() => handleChange('severity', severity)}
