@@ -33,21 +33,47 @@ const Layout: React.FC<LayoutProps> = ({
           });
           
           if (error) {
-            // If the user doesn't exist yet, let's create one
-            if (error.message.includes('Invalid login credentials')) {
-              const { error: signupError } = await supabase.auth.signUp({
+            // If the user doesn't exist yet or email not confirmed, let's create one and auto-confirm it
+            if (error.message.includes('Invalid login credentials') || error.message.includes('Email not confirmed')) {
+              // First try to sign up
+              const { data, error: signupError } = await supabase.auth.signUp({
                 email: 'dev@vetxpert.com',
                 password: 'devpassword123'
               });
               
-              if (!signupError) {
-                toast.success("Development account created and signed in");
-              } else {
+              if (signupError) {
                 console.error("Failed to create dev account:", signupError);
+                return;
+              }
+              
+              // For development, we'll use admin functions to confirm the email
+              // In a production environment, user would need to click on the confirmation email
+              const { error: adminError } = await supabase.auth.admin.updateUserById(
+                data.user?.id as string,
+                { email_confirm: true }
+              );
+              
+              if (adminError) {
+                console.error("Failed to confirm email:", adminError);
+                toast.error("Failed to confirm email. Please check the Supabase dashboard to manually confirm.");
+                
+                // Try signing in anyway since the account might have been created before
+                const { error: loginError } = await supabase.auth.signInWithPassword({
+                  email: 'dev@vetxpert.com',
+                  password: 'devpassword123'
+                });
+                
+                if (!loginError) {
+                  toast.success("Signed in with development account");
+                }
+              } else {
+                toast.success("Development account created and confirmed");
               }
             } else {
               console.error("Authentication error:", error);
             }
+          } else {
+            toast.success("Signed in with development account");
           }
         } catch (err) {
           console.error("Authentication error:", err);
