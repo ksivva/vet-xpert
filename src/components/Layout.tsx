@@ -1,10 +1,9 @@
+
 import React, { useEffect } from 'react';
 import Logo from './Logo';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
-import { Button } from './ui/button';
-import { LogOut } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -20,19 +19,23 @@ const Layout: React.FC<LayoutProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Development authentication helper - auto signs in with development account
   useEffect(() => {
     const checkAndSignIn = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
         try {
+          // Try to sign in with anonymous access for development
           const { error } = await supabase.auth.signInWithPassword({
             email: 'dev@vetxpert.com',
             password: 'devpassword123'
           });
           
           if (error) {
+            // If the user doesn't exist yet or email not confirmed, let's create one and auto-confirm it
             if (error.message.includes('Invalid login credentials') || error.message.includes('Email not confirmed')) {
+              // First try to sign up
               const { data, error: signupError } = await supabase.auth.signUp({
                 email: 'dev@vetxpert.com',
                 password: 'devpassword123'
@@ -43,6 +46,8 @@ const Layout: React.FC<LayoutProps> = ({
                 return;
               }
               
+              // For development, we'll use admin functions to confirm the email
+              // In a production environment, user would need to click on the confirmation email
               const { error: adminError } = await supabase.auth.admin.updateUserById(
                 data.user?.id as string,
                 { email_confirm: true }
@@ -52,6 +57,7 @@ const Layout: React.FC<LayoutProps> = ({
                 console.error("Failed to confirm email:", adminError);
                 toast.error("Failed to confirm email. Please check the Supabase dashboard to manually confirm.");
                 
+                // Try signing in anyway since the account might have been created before
                 const { error: loginError } = await supabase.auth.signInWithPassword({
                   email: 'dev@vetxpert.com',
                   password: 'devpassword123'
@@ -82,23 +88,13 @@ const Layout: React.FC<LayoutProps> = ({
     navigate(-1);
   };
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast.success('Successfully logged out');
-      navigate('/auth');
-    } catch (error) {
-      toast.error('Error logging out');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-vetxpert-background">
       <header className="bg-vetxpert-primary shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           {showBackButton ? (
             <button 
-              onClick={() => navigate(-1)}
+              onClick={handleBack}
               className="text-white"
               aria-label="Go back"
             >
@@ -112,14 +108,7 @@ const Layout: React.FC<LayoutProps> = ({
           
           <Logo />
           
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleLogout}
-            className="text-white hover:text-white hover:bg-vetxpert-primary/90"
-          >
-            <LogOut className="h-5 w-5" />
-          </Button>
+          <div className="w-6"></div>
         </div>
       </header>
       
