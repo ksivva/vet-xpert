@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -52,6 +51,12 @@ const Index: React.FC = () => {
   // Fetch animals based on filters
   useEffect(() => {
     const fetchAnimals = async () => {
+      // Only fetch animals if both lot and pen are selected
+      if (!selectedLotId || !selectedPenId) {
+        setFilteredAnimals([]);
+        return;
+      }
+
       let query = supabase.from('animals').select('*');
       
       if (selectedPenId) {
@@ -152,9 +157,11 @@ const Index: React.FC = () => {
         ) : (
           <div className="text-center py-10">
             <p className="text-gray-500">
-              {selectedLotId 
-                ? 'No animals found in the selected location.' 
-                : 'Please select a Lot to view animals.'}
+              {!selectedLotId
+                ? 'Please select a Lot to view animals.'
+                : !selectedPenId
+                ? 'Please select a Pen to view animals.'
+                : 'No animals found in the selected location.'}
             </p>
           </div>
         )}
