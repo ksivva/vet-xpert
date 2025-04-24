@@ -104,46 +104,50 @@ const Index: React.FC = () => {
 
   return (
     <Layout title="VetXpert">
-      <div className="space-y-6">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Search Filters */}
-        <div className="card-container">
-          <h2 className="text-lg font-semibold mb-3">Find Animal</h2>
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-100">
+          <h2 className="text-lg font-semibold mb-4">Find Animal</h2>
           
-          <SelectField
-            id="lot"
-            label="Lot"
-            value={selectedLotId}
-            options={lots?.map(lot => ({
-              value: lot.id,
-              label: `Lot ${lot.lotNumber}`
-            })) || []}
-            onChange={handleLotChange}
-          />
-          
-          <SelectField
-            id="pen"
-            label="Pen"
-            value={selectedPenId}
-            options={pens?.map(pen => ({
-              value: pen.id,
-              label: `Pen ${pen.penNumber}`
-            })) || []}
-            onChange={handlePenChange}
-            disabled={!selectedLotId}
-          />
+          <div className="space-y-4">
+            <SelectField
+              id="lot"
+              label="Lot"
+              value={selectedLotId}
+              options={lots?.map(lot => ({
+                value: lot.id,
+                label: `Lot ${lot.lotNumber}`
+              })) || []}
+              onChange={handleLotChange}
+            />
+            
+            <SelectField
+              id="pen"
+              label="Pen"
+              value={selectedPenId}
+              options={pens?.map(pen => ({
+                value: pen.id,
+                label: `Pen ${pen.penNumber}`
+              })) || []}
+              onChange={handlePenChange}
+              disabled={!selectedLotId}
+            />
+          </div>
         </div>
 
         {/* Animal List */}
         {filteredAnimals.length > 0 ? (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">Animals</h2>
-            {filteredAnimals.map(animal => (
-              <AnimalCard 
-                key={animal.id} 
-                animal={animal}
-                onClick={() => handleStartTreatment(animal)}
-              />
-            ))}
+            <div className="space-y-4">
+              {filteredAnimals.map(animal => (
+                <AnimalCard 
+                  key={animal.id} 
+                  animal={animal}
+                  onClick={() => handleStartTreatment(animal)}
+                />
+              ))}
+            </div>
           </div>
         ) : (
           <div className="text-center py-10">

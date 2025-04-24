@@ -29,7 +29,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
 }) => {
   return (
     <div className={`mb-4 ${className}`}>
-      <label htmlFor={id} className="label">
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <div className="relative">
@@ -37,7 +37,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
           id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="select-field"
+          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vetxpert-purple bg-white appearance-none text-sm sm:text-base"
           disabled={disabled}
           required={required}
         >
@@ -49,7 +49,18 @@ const SelectField: React.FC<SelectFieldProps> = ({
           ))}
         </select>
         <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="16" 
+            height="16" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            className="text-gray-500"
+          >
             <path d="m6 9 6 6 6-6"/>
           </svg>
         </div>
