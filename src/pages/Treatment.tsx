@@ -4,136 +4,114 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import Layout from '../components/Layout';
 import SelectField from '../components/SelectField';
-import { getAnimalById, getTreatmentsByDiagnosisId, saveTreatment } from '../utils/dataUtils';
-import { diagnoses, treatments, pens, currentUser } from '../data/mockData';
-import { TreatmentFormData, Severity, Treatment, Animal } from '../types';
+import { saveTreatment } from '../utils/dataUtils';
+import { TreatmentFormData, Severity } from '../types';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 const TreatmentPage: React.FC = () => {
   const { animalId } = useParams<{ animalId: string }>();
   const navigate = useNavigate();
-  const [availableTreatments, setAvailableTreatments] = useState<Treatment[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [availablePens, setAvailablePens] = useState<{value: string, label: string}[]>([]);
   const [availableDiagnoses, setAvailableDiagnoses] = useState<{value: string, label: string}[]>([]);
+  const [availableTreatments, setAvailableTreatments] = useState<{value: string, label: string}[]>([]);
   
   const [formData, setFormData] = useState<TreatmentFormData>({
     diagnosisId: '',
     treatmentId: '',
-    treatmentPerson: currentUser.id,
+    treatmentPerson: '', // Keep this as it's required by the type, but we won't show it in UI
     currentWeight: '',
     severity: 'Medium' as Severity,
     date: new Date().toISOString().split('T')[0],
     moveTo: ''
   });
 
-  // Get animal data using React Query
-  const { data: animal, isLoading: isLoadingAnimal, error: animalError } = useQuery({
+  // Get animal data
+  const { data: animal, isLoading: isLoadingAnimal } = useQuery({
     queryKey: ['animal', animalId],
     queryFn: async () => {
       if (!animalId) return null;
-      return getAnimalById(animalId);
+      const { data, error } = await supabase
+        .from('animals')
+        .select('*')
+        .eq('id', animalId)
+        .single();
+      if (error) throw error;
+      return data;
     },
     enabled: !!animalId
   });
 
-  // Fetch pens from Supabase when component mounts
+  // Fetch pens and diagnoses when component mounts
   useEffect(() => {
-    const fetchPens = async () => {
-      const { data, error } = await supabase
+    const fetchData = async () => {
+      // Fetch pens
+      const { data: pensData, error: pensError } = await supabase
         .from('pens')
         .select('id, pen_number');
       
-      if (error) {
-        console.error('Error fetching pens:', error);
-        // Fallback to mock data
-        setAvailablePens(pens.map(pen => ({
-          value: pen.id,
-          label: pen.penNumber
-        })));
+      if (pensError) {
+        console.error('Error fetching pens:', pensError);
+        toast.error('Failed to load pens');
         return;
       }
       
-      if (data && data.length > 0) {
-        setAvailablePens(data.map(pen => ({
-          value: pen.id,
-          label: pen.pen_number
-        })));
-      } else {
-        // Use mock data if no data from Supabase
-        setAvailablePens(pens.map(pen => ({
-          value: pen.id,
-          label: pen.penNumber
-        })));
-      }
-    };
+      setAvailablePens(pensData.map(pen => ({
+        value: pen.id,
+        label: pen.pen_number
+      })));
 
-    const fetchDiagnoses = async () => {
-      const { data, error } = await supabase
+      // Fetch diagnoses
+      const { data: diagnosesData, error: diagnosesError } = await supabase
         .from('diagnoses')
         .select('id, name');
       
-      if (error) {
-        console.error('Error fetching diagnoses:', error);
-        // Fallback to mock data
-        setAvailableDiagnoses(diagnoses.map(diag => ({
-          value: diag.id,
-          label: diag.name
-        })));
+      if (diagnosesError) {
+        console.error('Error fetching diagnoses:', diagnosesError);
+        toast.error('Failed to load diagnoses');
         return;
       }
       
-      if (data && data.length > 0) {
-        setAvailableDiagnoses(data.map(diag => ({
-          value: diag.id,
-          label: diag.name
-        })));
-      } else {
-        // Use mock data if no data from Supabase
-        setAvailableDiagnoses(diagnoses.map(diag => ({
-          value: diag.id,
-          label: diag.name
-        })));
-      }
+      setAvailableDiagnoses(diagnosesData.map(diag => ({
+        value: diag.id,
+        label: diag.name
+      })));
     };
 
-    fetchPens();
-    fetchDiagnoses();
+    fetchData();
   }, []);
-  
-  useEffect(() => {
-    // If no animal found, show error and redirect
-    if (animalId && animalError) {
-      toast.error('Error loading animal data');
-      navigate('/');
-    }
-  }, [animalId, animalError, navigate]);
 
-  // Update available treatments when diagnosis changes
+  // Fetch treatments when diagnosis changes
   useEffect(() => {
     const fetchTreatments = async () => {
-      if (formData.diagnosisId) {
-        try {
-          const treatments = await getTreatmentsByDiagnosisId(formData.diagnosisId);
-          setAvailableTreatments(treatments || []);
-          
-          // Clear treatment selection if not in filtered list
-          if (formData.treatmentId && !treatments.some(t => t.id === formData.treatmentId)) {
-            setFormData(prev => ({ ...prev, treatmentId: '' }));
-          }
-        } catch (error) {
-          console.error('Error fetching treatments:', error);
-          toast.error('Failed to load treatments');
-          setAvailableTreatments([]);
-        }
-      } else {
+      if (!formData.diagnosisId) {
         setAvailableTreatments([]);
+        return;
       }
+
+      const { data, error } = await supabase
+        .from('treatment_diagnoses')
+        .select(`
+          treatment_id,
+          treatments (id, name)
+        `)
+        .eq('diagnosis_id', formData.diagnosisId);
+      
+      if (error) {
+        console.error('Error fetching treatments:', error);
+        toast.error('Failed to load treatments');
+        return;
+      }
+
+      setAvailableTreatments(data.map(item => ({
+        value: item.treatments.id,
+        label: item.treatments.name
+      })));
     };
-    
+
     fetchTreatments();
-  }, [formData.diagnosisId, formData.treatmentId]);
+  }, [formData.diagnosisId]);
 
   const handleChange = (field: keyof TreatmentFormData, value: string) => {
     setFormData(prev => ({
@@ -145,12 +123,6 @@ const TreatmentPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate form
-    if (!formData.diagnosisId || !formData.treatmentId || !formData.moveTo) {
-      toast.error('Please fill all required fields');
-      return;
-    }
-    
     if (!animalId) {
       toast.error('Animal ID is missing');
       return;
@@ -159,7 +131,11 @@ const TreatmentPage: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      const success = await saveTreatment(animalId, formData);
+      // Set a default treatment person (can be updated later if needed)
+      const success = await saveTreatment(animalId, {
+        ...formData,
+        treatmentPerson: 'system'
+      });
       
       if (success) {
         toast.success('Treatment saved successfully');
@@ -196,7 +172,7 @@ const TreatmentPage: React.FC = () => {
   }
 
   return (
-    <Layout title={`Treat ${animal.visualTag}`} showBackButton>
+    <Layout title={`Treat ${animal.visual_tag}`} showBackButton>
       <div className="card-container">
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
@@ -208,7 +184,7 @@ const TreatmentPage: React.FC = () => {
             </span>
           </div>
           <p className="text-sm text-gray-500">
-            {animal.gender} • DOF: {animal.daysOnFeed} days • Days to Ship: {animal.daysToShip}
+            {animal.gender} • DOF: {animal.days_on_feed} days • Days to Ship: {animal.days_to_ship}
           </p>
         </div>
         
@@ -226,26 +202,10 @@ const TreatmentPage: React.FC = () => {
             id="treatment"
             label="Treatment"
             value={formData.treatmentId}
-            options={availableTreatments && availableTreatments.length > 0 ? 
-              availableTreatments.map(treat => ({
-                value: treat.id,
-                label: treat.name
-              })) : []
-            }
+            options={availableTreatments}
             onChange={(value) => handleChange('treatmentId', value)}
             disabled={!formData.diagnosisId || availableTreatments.length === 0}
             required
-          />
-          
-          <SelectField
-            id="treatmentPerson"
-            label="Treatment Person"
-            value={formData.treatmentPerson}
-            options={[currentUser].map(user => ({
-              value: user.id,
-              label: user.name
-            }))}
-            onChange={(value) => handleChange('treatmentPerson', value)}
           />
           
           <div className="mb-4">
