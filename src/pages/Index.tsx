@@ -30,7 +30,10 @@ const Index: React.FC = () => {
     queryFn: async () => {
       const { data, error } = await supabase.from('lots').select('*');
       if (error) throw error;
-      return data;
+      return data.map(lot => ({
+        id: lot.id,
+        lotNumber: lot.lot_number
+      }));
     }
   });
 
@@ -113,7 +116,7 @@ const Index: React.FC = () => {
             value={selectedLotId}
             options={lots?.map(lot => ({
               value: lot.id,
-              label: `Lot ${lot.lot_number}`
+              label: `Lot ${lot.lotNumber}`
             })) || []}
             onChange={handleLotChange}
           />
@@ -124,7 +127,7 @@ const Index: React.FC = () => {
             value={selectedPenId}
             options={pens?.map(pen => ({
               value: pen.id,
-              label: `Pen ${pen.pen_number}`
+              label: `Pen ${pen.penNumber}`
             })) || []}
             onChange={handlePenChange}
             disabled={!selectedLotId}
@@ -136,7 +139,7 @@ const Index: React.FC = () => {
             value={selectedAnimalId}
             options={filteredAnimals.map(animal => ({
               value: animal.id,
-              label: animal.visual_tag
+              label: animal.visualTag
             }))}
             onChange={handleAnimalChange}
             disabled={filteredAnimals.length === 0}

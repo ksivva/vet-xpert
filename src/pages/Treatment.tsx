@@ -6,7 +6,8 @@ import Layout from '../components/Layout';
 import SelectField from '../components/SelectField';
 import { getAnimalById, getTreatmentsByDiagnosisId } from '../utils/dataUtils';
 import { diagnoses, treatments, pens, currentUser } from '../data/mockData';
-import { TreatmentFormData, Severity, Treatment } from '../types';
+import { TreatmentFormData, Severity, Treatment, Animal } from '../types';
+import { useQuery } from '@tanstack/react-query';
 
 const TreatmentPage: React.FC = () => {
   const { animalId } = useParams<{ animalId: string }>();
@@ -23,31 +24,47 @@ const TreatmentPage: React.FC = () => {
     moveTo: ''
   });
 
-  // Get animal data
-  const animal = animalId ? getAnimalById(animalId) : undefined;
+  // Get animal data using React Query
+  const { data: animal, isLoading: isLoadingAnimal, error: animalError } = useQuery({
+    queryKey: ['animal', animalId],
+    queryFn: async () => {
+      if (!animalId) return null;
+      return getAnimalById(animalId);
+    },
+    enabled: !!animalId
+  });
   
   useEffect(() => {
     // If no animal found, show error and redirect
-    if (animalId && !animal) {
-      toast.error('Animal not found');
+    if (animalId && animalError) {
+      toast.error('Error loading animal data');
       navigate('/');
-      return;
     }
-  }, [animal, animalId, navigate]);
+  }, [animalId, animalError, navigate]);
 
   // Update available treatments when diagnosis changes
   useEffect(() => {
-    if (formData.diagnosisId) {
-      const filtered = getTreatmentsByDiagnosisId(formData.diagnosisId);
-      setAvailableTreatments(filtered);
-      
-      // Clear treatment selection if not in filtered list
-      if (formData.treatmentId && !filtered.some(t => t.id === formData.treatmentId)) {
-        setFormData(prev => ({ ...prev, treatmentId: '' }));
+    const fetchTreatments = async () => {
+      if (formData.diagnosisId) {
+        try {
+          const treatments = await getTreatmentsByDiagnosisId(formData.diagnosisId);
+          setAvailableTreatments(treatments);
+          
+          // Clear treatment selection if not in filtered list
+          if (formData.treatmentId && !treatments.some(t => t.id === formData.treatmentId)) {
+            setFormData(prev => ({ ...prev, treatmentId: '' }));
+          }
+        } catch (error) {
+          console.error('Error fetching treatments:', error);
+          toast.error('Failed to load treatments');
+          setAvailableTreatments([]);
+        }
+      } else {
+        setAvailableTreatments([]);
       }
-    } else {
-      setAvailableTreatments([]);
-    }
+    };
+    
+    fetchTreatments();
   }, [formData.diagnosisId, formData.treatmentId]);
 
   const handleChange = (field: keyof TreatmentFormData, value: string) => {
@@ -76,11 +93,21 @@ const TreatmentPage: React.FC = () => {
     navigate('/');
   };
 
-  if (!animal) {
+  if (isLoadingAnimal) {
     return (
       <Layout title="Treatment" showBackButton>
         <div className="text-center py-10">
           <p className="text-gray-500">Loading animal data...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!animal) {
+    return (
+      <Layout title="Treatment" showBackButton>
+        <div className="text-center py-10">
+          <p className="text-gray-500">Animal not found</p>
         </div>
       </Layout>
     );
