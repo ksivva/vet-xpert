@@ -22,13 +22,13 @@ const Layout: React.FC<LayoutProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm sticky top-0 z-10">
+    <div className="min-h-screen bg-vetxpert-background">
+      <header className="bg-vetxpert-primary shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           {showBackButton ? (
             <button 
               onClick={handleBack}
-              className="text-vetxpert-blue"
+              className="text-white"
               aria-label="Go back"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -47,7 +47,7 @@ const Layout: React.FC<LayoutProps> = ({
       
       <main className="container mx-auto px-4 py-6">
         {title && (
-          <h1 className="text-2xl font-bold mb-4 text-vetxpert-blue">{title}</h1>
+          <h1 className="text-2xl font-bold mb-4 text-vetxpert-primary">{title}</h1>
         )}
         {children}
       </main>

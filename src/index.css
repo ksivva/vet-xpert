@@ -1,24 +1,17 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 220 50% 98%; /* Light blue background */
     --foreground: 222.2 84% 4.9%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --primary: 220 80% 30%; /* Deep blue */
+    --primary-foreground: 0 0% 100%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 238 92% 23%; /* Deep blue */
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 50% 60%; /* Medium blue */
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
@@ -46,20 +39,20 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 220 50% 10%; /* Dark blue background for dark mode */
+    --foreground: 0 0% 98%;
+
+    --primary: 220 80% 60%; /* Lighter blue for dark mode */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 50% 40%; /* Darker blue for secondary in dark mode */
+    --secondary-foreground: 0 0% 100%;
 
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
 
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
@@ -96,11 +89,11 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-vetxpert-blue text-white hover:bg-opacity-90 transition-all py-3 px-6 rounded-md font-medium text-center;
+    @apply bg-vetxpert-primary text-white hover:bg-opacity-90 transition-all py-3 px-6 rounded-md font-medium text-center;
   }
   
   .btn-secondary {
-    @apply bg-vetxpert-purple text-white hover:bg-opacity-90 transition-all py-3 px-6 rounded-md font-medium text-center;
+    @apply bg-vetxpert-secondary text-white hover:bg-opacity-90 transition-all py-3 px-6 rounded-md font-medium text-center;
   }
 
   .card-container {
