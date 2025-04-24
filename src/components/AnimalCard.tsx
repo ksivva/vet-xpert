@@ -19,7 +19,7 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal, onClick }) => {
           <h3 className="text-lg sm:text-xl font-bold">{animal.visualTag}</h3>
           <p className="text-gray-500">{animal.gender}</p>
         </div>
-        <span className="inline-block bg-vetxpert-purple text-white px-3 py-1 rounded-full text-sm">
+        <span className="inline-block bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
           {animal.pulls > 0 ? `Pulls: ${animal.pulls}` : 'No Pulls'}
         </span>
       </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -188,6 +187,36 @@ const TreatmentPage: React.FC = () => {
           </p>
         </div>
         
+        <div className="mt-4 pt-3 border-t">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2">
+            <p className="text-blue-600 text-sm">ReTreatments: {animal.reTreat}</p>
+            <button 
+              className="text-blue-600 hover:underline text-sm flex items-center"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onClick) onClick();
+              }}
+            >
+              Start Treatment
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="16" 
+                height="16" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className="ml-1 text-blue-600"
+              >
+                <path d="M5 12h14"/>
+                <path d="m12 5 7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <SelectField
             id="diagnosis"
@@ -229,9 +258,9 @@ const TreatmentPage: React.FC = () => {
                 <button
                   key={severity}
                   type="button"
-                  className={`py-2 px-4 border rounded-md transition-all ${
+                  className={`py-2 px-4 border-2 rounded-md transition-all ${
                     formData.severity === severity 
-                      ? 'bg-vetxpert-primary text-white border-vetxpert-primary' 
+                      ? 'bg-blue-500 text-white border-blue-500' 
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                   }`}
                   onClick={() => handleChange('severity', severity)}
