@@ -10,12 +10,15 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Get the base URL from import.meta.env or fallback to the one defined in vite.config.ts
+const baseUrl = import.meta.env.BASE_URL || "/vet-xpert/";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename={baseUrl}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/treatment/:animalId" element={<Treatment />} />
