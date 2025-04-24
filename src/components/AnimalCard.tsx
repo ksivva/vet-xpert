@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Arrow } from 'lucide-react';
 import { Animal } from '../types';
 import { formatCurrency, getWeekCount } from '../utils/dataUtils';
 
@@ -47,7 +48,7 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal, onClick }) => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2">
           <p className="text-gray-500 text-sm">ReTreatments: {animal.reTreat}</p>
           <button 
-            className="text-vetxpert-purple hover:underline text-sm flex items-center"
+            className="text-blue-600 hover:underline text-sm flex items-center"
             onClick={(e) => {
               e.stopPropagation();
               if (onClick) onClick();
@@ -64,7 +65,7 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal, onClick }) => {
               strokeWidth="2" 
               strokeLinecap="round" 
               strokeLinejoin="round" 
-              className="ml-1"
+              className="ml-1 text-blue-600"
             >
               <path d="M5 12h14"/>
               <path d="m12 5 7 7-7 7"/>
@@ -77,3 +78,4 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal, onClick }) => {
 };
 
 export default AnimalCard;
+
