@@ -207,40 +207,41 @@ export const getTreatmentsByDiagnosisId = async (diagnosisId: string): Promise<T
 
 export const saveTreatment = async (animalId: string, formData: TreatmentFormData): Promise<boolean> => {
   try {
-    const { error } = await supabase
+    // Insert the treatment record
+    const { error: treatmentError } = await supabase
       .from('animal_treatments')
       .insert({
         animal_id: animalId,
         diagnosis_id: formData.diagnosisId,
         treatment_id: formData.treatmentId,
-        treatment_person: formData.treatmentPerson,
+        treatment_person: formData.treatmentPerson || 'system',
         current_weight: formData.currentWeight ? parseFloat(formData.currentWeight) : null,
         severity: formData.severity,
         treatment_date: formData.date,
         moved_to_pen_id: formData.moveTo
       });
       
-    if (error) {
-      console.error('Error saving treatment:', error);
+    if (treatmentError) {
+      console.error('Detailed treatment insertion error:', treatmentError);
       return false;
     }
     
     // Update animal's pen if moved
     if (formData.moveTo) {
-      const { error: updateError } = await supabase
+      const { error: penUpdateError } = await supabase
         .from('animals')
         .update({ pen_id: formData.moveTo })
         .eq('id', animalId);
         
-      if (updateError) {
-        console.error('Error updating animal pen:', updateError);
+      if (penUpdateError) {
+        console.error('Error updating animal pen:', penUpdateError);
         // We still return true as the treatment was saved
       }
     }
     
     return true;
   } catch (error) {
-    console.error('Exception saving treatment:', error);
+    console.error('Unexpected error saving treatment:', error);
     return false;
   }
 };
