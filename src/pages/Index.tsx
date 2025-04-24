@@ -1,22 +1,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from "@/integrations/supabase/client";
 import Layout from '../components/Layout';
 import SelectField from '../components/SelectField';
 import BarcodeScanner from '../components/BarcodeScanner';
 import AnimalCard from '../components/AnimalCard';
-import { 
-  animals, 
-  lots, 
-  pens 
-} from '../data/mockData';
 import { 
   getAnimalById, 
   getAnimalsByLotId, 
   getAnimalsByPenId, 
   getPensByLotId
 } from '../utils/dataUtils';
-import { Animal } from '../types';
+import { Animal, Pen, Lot } from '../types';
 import { toast } from 'sonner';
 
 const Index: React.FC = () => {
@@ -24,50 +21,52 @@ const Index: React.FC = () => {
   const [selectedAnimalId, setSelectedAnimalId] = useState<string>('');
   const [selectedLotId, setSelectedLotId] = useState<string>('');
   const [selectedPenId, setSelectedPenId] = useState<string>('');
-  const [filteredPens, setFilteredPens] = useState(pens);
   const [filteredAnimals, setFilteredAnimals] = useState<Animal[]>([]);
   const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
 
-  // Update filtered pens when lot changes
-  useEffect(() => {
-    if (selectedLotId) {
-      const pensByLot = getPensByLotId(selectedLotId);
-      setFilteredPens(pensByLot);
-      // Clear pen selection if current selection is not in filtered pens
-      if (selectedPenId && !pensByLot.some(pen => pen.id === selectedPenId)) {
-        setSelectedPenId('');
-      }
-    } else {
-      setFilteredPens(pens);
+  // Fetch initial data
+  const { data: lots } = useQuery({
+    queryKey: ['lots'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('lots').select('*');
+      if (error) throw error;
+      return data;
     }
-  }, [selectedLotId, selectedPenId]);
+  });
 
-  // Update filtered animals
+  const { data: pens } = useQuery({
+    queryKey: ['pens', selectedLotId],
+    queryFn: async () => {
+      if (!selectedLotId) return [];
+      return getPensByLotId(selectedLotId);
+    },
+    enabled: !!selectedLotId
+  });
+
+  // Update filtered animals when selections change
   useEffect(() => {
-    let filtered: Animal[] = [];
-    
-    if (selectedAnimalId) {
-      const animal = getAnimalById(selectedAnimalId);
-      filtered = animal ? [animal] : [];
-    } else if (selectedPenId) {
-      filtered = getAnimalsByPenId(selectedPenId);
-    } else if (selectedLotId) {
-      filtered = getAnimalsByLotId(selectedLotId);
-    }
-    
-    setFilteredAnimals(filtered);
-    
-    // Auto-select the animal if there's only one
-    if (filtered.length === 1) {
-      setSelectedAnimal(filtered[0]);
-    } else {
-      setSelectedAnimal(null);
-    }
+    const fetchAnimals = async () => {
+      let animals: Animal[] = [];
+      
+      if (selectedAnimalId) {
+        const animal = await getAnimalById(selectedAnimalId);
+        animals = animal ? [animal] : [];
+      } else if (selectedPenId) {
+        animals = await getAnimalsByPenId(selectedPenId);
+      } else if (selectedLotId) {
+        animals = await getAnimalsByLotId(selectedLotId);
+      }
+      
+      setFilteredAnimals(animals);
+      setSelectedAnimal(animals.length === 1 ? animals[0] : null);
+    };
+
+    fetchAnimals();
   }, [selectedAnimalId, selectedLotId, selectedPenId]);
 
   // Handle barcode scan
-  const handleScan = (animalId: string) => {
-    const animal = getAnimalById(animalId);
+  const handleScan = async (animalId: string) => {
+    const animal = await getAnimalById(animalId);
     if (animal) {
       setSelectedAnimalId(animal.id);
       setSelectedLotId(animal.lotId);
@@ -112,10 +111,10 @@ const Index: React.FC = () => {
             id="lot"
             label="Lot"
             value={selectedLotId}
-            options={lots.map(lot => ({
+            options={lots?.map(lot => ({
               value: lot.id,
-              label: `Lot ${lot.lotNumber}`
-            }))}
+              label: `Lot ${lot.lot_number}`
+            })) || []}
             onChange={handleLotChange}
           />
           
@@ -123,12 +122,12 @@ const Index: React.FC = () => {
             id="pen"
             label="Pen"
             value={selectedPenId}
-            options={filteredPens.map(pen => ({
+            options={pens?.map(pen => ({
               value: pen.id,
-              label: `Pen ${pen.penNumber}`
-            }))}
+              label: `Pen ${pen.pen_number}`
+            })) || []}
             onChange={handlePenChange}
-            disabled={!selectedLotId && filteredPens.length === pens.length}
+            disabled={!selectedLotId}
           />
           
           <SelectField
@@ -137,7 +136,7 @@ const Index: React.FC = () => {
             value={selectedAnimalId}
             options={filteredAnimals.map(animal => ({
               value: animal.id,
-              label: animal.visualTag
+              label: animal.visual_tag
             }))}
             onChange={handleAnimalChange}
             disabled={filteredAnimals.length === 0}

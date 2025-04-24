@@ -9,7 +9,164 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      animals: {
+        Row: {
+          days_on_feed: number
+          days_to_ship: number
+          gender: string | null
+          id: string
+          lot_id: string | null
+          ltd_treatment_cost: number
+          pen_id: string | null
+          pulls: number
+          re_pulls: number
+          re_treat: number
+          visual_tag: string
+        }
+        Insert: {
+          days_on_feed: number
+          days_to_ship: number
+          gender?: string | null
+          id?: string
+          lot_id?: string | null
+          ltd_treatment_cost: number
+          pen_id?: string | null
+          pulls?: number
+          re_pulls?: number
+          re_treat?: number
+          visual_tag: string
+        }
+        Update: {
+          days_on_feed?: number
+          days_to_ship?: number
+          gender?: string | null
+          id?: string
+          lot_id?: string | null
+          ltd_treatment_cost?: number
+          pen_id?: string | null
+          pulls?: number
+          re_pulls?: number
+          re_treat?: number
+          visual_tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "animals_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "lots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "animals_pen_id_fkey"
+            columns: ["pen_id"]
+            isOneToOne: false
+            referencedRelation: "pens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diagnoses: {
+        Row: {
+          id: string
+          name: string
+        }
+        Insert: {
+          id?: string
+          name: string
+        }
+        Update: {
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      lots: {
+        Row: {
+          id: string
+          lot_number: string
+        }
+        Insert: {
+          id?: string
+          lot_number: string
+        }
+        Update: {
+          id?: string
+          lot_number?: string
+        }
+        Relationships: []
+      }
+      pens: {
+        Row: {
+          id: string
+          lot_id: string | null
+          pen_number: string
+        }
+        Insert: {
+          id?: string
+          lot_id?: string | null
+          pen_number: string
+        }
+        Update: {
+          id?: string
+          lot_id?: string | null
+          pen_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pens_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "lots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      treatment_diagnoses: {
+        Row: {
+          diagnosis_id: string
+          treatment_id: string
+        }
+        Insert: {
+          diagnosis_id: string
+          treatment_id: string
+        }
+        Update: {
+          diagnosis_id?: string
+          treatment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treatment_diagnoses_diagnosis_id_fkey"
+            columns: ["diagnosis_id"]
+            isOneToOne: false
+            referencedRelation: "diagnoses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treatment_diagnoses_treatment_id_fkey"
+            columns: ["treatment_id"]
+            isOneToOne: false
+            referencedRelation: "treatments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      treatments: {
+        Row: {
+          id: string
+          name: string
+        }
+        Insert: {
+          id?: string
+          name: string
+        }
+        Update: {
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
