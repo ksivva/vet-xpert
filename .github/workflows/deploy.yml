@@ -29,6 +29,8 @@ jobs:
       
       - name: Build project
         run: npm run build
+        env:
+          BASE_URL: /vet-xpert/
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
