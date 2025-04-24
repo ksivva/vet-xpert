@@ -8,12 +8,15 @@ import { getAnimalById, getTreatmentsByDiagnosisId, saveTreatment } from '../uti
 import { diagnoses, treatments, pens, currentUser } from '../data/mockData';
 import { TreatmentFormData, Severity, Treatment, Animal } from '../types';
 import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const TreatmentPage: React.FC = () => {
   const { animalId } = useParams<{ animalId: string }>();
   const navigate = useNavigate();
   const [availableTreatments, setAvailableTreatments] = useState<Treatment[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [availablePens, setAvailablePens] = useState<{value: string, label: string}[]>([]);
+  const [availableDiagnoses, setAvailableDiagnoses] = useState<{value: string, label: string}[]>([]);
   
   const [formData, setFormData] = useState<TreatmentFormData>({
     diagnosisId: '',
@@ -34,6 +37,70 @@ const TreatmentPage: React.FC = () => {
     },
     enabled: !!animalId
   });
+
+  // Fetch pens from Supabase when component mounts
+  useEffect(() => {
+    const fetchPens = async () => {
+      const { data, error } = await supabase
+        .from('pens')
+        .select('id, pen_number');
+      
+      if (error) {
+        console.error('Error fetching pens:', error);
+        // Fallback to mock data
+        setAvailablePens(pens.map(pen => ({
+          value: pen.id,
+          label: pen.penNumber
+        })));
+        return;
+      }
+      
+      if (data && data.length > 0) {
+        setAvailablePens(data.map(pen => ({
+          value: pen.id,
+          label: pen.pen_number
+        })));
+      } else {
+        // Use mock data if no data from Supabase
+        setAvailablePens(pens.map(pen => ({
+          value: pen.id,
+          label: pen.penNumber
+        })));
+      }
+    };
+
+    const fetchDiagnoses = async () => {
+      const { data, error } = await supabase
+        .from('diagnoses')
+        .select('id, name');
+      
+      if (error) {
+        console.error('Error fetching diagnoses:', error);
+        // Fallback to mock data
+        setAvailableDiagnoses(diagnoses.map(diag => ({
+          value: diag.id,
+          label: diag.name
+        })));
+        return;
+      }
+      
+      if (data && data.length > 0) {
+        setAvailableDiagnoses(data.map(diag => ({
+          value: diag.id,
+          label: diag.name
+        })));
+      } else {
+        // Use mock data if no data from Supabase
+        setAvailableDiagnoses(diagnoses.map(diag => ({
+          value: diag.id,
+          label: diag.name
+        })));
+      }
+    };
+
+    fetchPens();
+    fetchDiagnoses();
+  }, []);
   
   useEffect(() => {
     // If no animal found, show error and redirect
@@ -150,10 +217,7 @@ const TreatmentPage: React.FC = () => {
             id="diagnosis"
             label="Diagnosis"
             value={formData.diagnosisId}
-            options={diagnoses.map(diag => ({
-              value: diag.id,
-              label: diag.name
-            }))}
+            options={availableDiagnoses}
             onChange={(value) => handleChange('diagnosisId', value)}
             required
           />
@@ -233,10 +297,7 @@ const TreatmentPage: React.FC = () => {
             id="moveTo"
             label="Move To"
             value={formData.moveTo}
-            options={pens.map(pen => ({
-              value: pen.id,
-              label: pen.penNumber
-            }))}
+            options={availablePens}
             onChange={(value) => handleChange('moveTo', value)}
             required
           />
