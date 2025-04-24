@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Animal, Pen, Lot, Treatment } from '../types';
 
@@ -16,11 +15,13 @@ export const getAnimalById = async (id: string): Promise<Animal | null> => {
   
   if (!data) return null;
   
-  // Map from database schema to our TypeScript types
+  // Map from database schema to our TypeScript types, ensuring gender is the right type
   return {
     id: data.id,
     visualTag: data.visual_tag,
-    gender: data.gender,
+    gender: (data.gender === 'Steer' || data.gender === 'Cow') 
+      ? data.gender as 'Steer' | 'Cow'
+      : 'Steer', // Default to 'Steer' if gender is invalid
     daysOnFeed: data.days_on_feed,
     daysToShip: data.days_to_ship,
     ltdTreatmentCost: data.ltd_treatment_cost,
@@ -45,11 +46,13 @@ export const getAnimalsByLotId = async (lotId: string): Promise<Animal[]> => {
   
   if (!data) return [];
   
-  // Map each item from database schema to our TypeScript types
+  // Map each item from database schema to our TypeScript types, handling gender type
   return data.map(item => ({
     id: item.id,
     visualTag: item.visual_tag,
-    gender: item.gender,
+    gender: (item.gender === 'Steer' || item.gender === 'Cow') 
+      ? item.gender as 'Steer' | 'Cow'
+      : 'Steer', // Default to 'Steer' if gender is invalid
     daysOnFeed: item.days_on_feed,
     daysToShip: item.days_to_ship,
     ltdTreatmentCost: item.ltd_treatment_cost,
@@ -74,11 +77,13 @@ export const getAnimalsByPenId = async (penId: string): Promise<Animal[]> => {
   
   if (!data) return [];
   
-  // Map each item from database schema to our TypeScript types
+  // Map each item from database schema to our TypeScript types, handling gender type
   return data.map(item => ({
     id: item.id,
     visualTag: item.visual_tag,
-    gender: item.gender,
+    gender: (item.gender === 'Steer' || item.gender === 'Cow') 
+      ? item.gender as 'Steer' | 'Cow'
+      : 'Steer', // Default to 'Steer' if gender is invalid
     daysOnFeed: item.days_on_feed,
     daysToShip: item.days_to_ship,
     ltdTreatmentCost: item.ltd_treatment_cost,
