@@ -10,8 +10,8 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Always use the base URL from vite.config.ts for consistency
-const baseUrl = "/vet-xpert/";
+// Use the base URL from import.meta.env for consistency across environments
+const baseUrl = import.meta.env.BASE_URL || "/vet-xpert/";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
