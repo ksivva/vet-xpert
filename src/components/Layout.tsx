@@ -33,44 +33,13 @@ const Layout: React.FC<LayoutProps> = ({
           });
           
           if (error) {
-            // If the user doesn't exist yet or email not confirmed, let's create one and auto-confirm it
-            if (error.message.includes('Invalid login credentials') || error.message.includes('Email not confirmed')) {
-              // First try to sign up
-              const { data, error: signupError } = await supabase.auth.signUp({
-                email: 'dev@vetxpert.com',
-                password: 'devpassword123'
-              });
-              
-              if (signupError) {
-                console.error("Failed to create dev account:", signupError);
-                return;
-              }
-              
-              // For development, we'll use admin functions to confirm the email
-              // In a production environment, user would need to click on the confirmation email
-              const { error: adminError } = await supabase.auth.admin.updateUserById(
-                data.user?.id as string,
-                { email_confirm: true }
-              );
-              
-              if (adminError) {
-                console.error("Failed to confirm email:", adminError);
-                toast.error("Failed to confirm email. Please check the Supabase dashboard to manually confirm.");
-                
-                // Try signing in anyway since the account might have been created before
-                const { error: loginError } = await supabase.auth.signInWithPassword({
-                  email: 'dev@vetxpert.com',
-                  password: 'devpassword123'
-                });
-                
-                if (!loginError) {
-                  toast.success("Signed in with development account");
-                }
-              } else {
-                toast.success("Development account created and confirmed");
-              }
-            } else {
-              console.error("Authentication error:", error);
+            // If authentication fails, just log the error but continue rendering the app
+            console.log("Authentication error (app will continue to work):", error.message);
+            
+            // Only show toast in development
+            if (import.meta.env.DEV) {
+              toast.error("Authentication error: " + error.message);
+              toast.info("App continues in limited mode without authentication");
             }
           } else {
             toast.success("Signed in with development account");
@@ -81,6 +50,7 @@ const Layout: React.FC<LayoutProps> = ({
       }
     };
 
+    // Try authentication but don't block rendering if it fails
     checkAndSignIn();
   }, []);
 
