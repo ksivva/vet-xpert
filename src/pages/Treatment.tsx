@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -5,12 +6,13 @@ import Layout from '../components/Layout';
 import SelectField from '../components/SelectField';
 import { saveTreatment } from '../utils/dataUtils';
 import { TreatmentFormData, Severity } from '../types';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 const TreatmentPage: React.FC = () => {
   const { animalId } = useParams<{ animalId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [availablePens, setAvailablePens] = useState<{value: string, label: string}[]>([]);
   const [availableDiagnoses, setAvailableDiagnoses] = useState<{value: string, label: string}[]>([]);
@@ -137,7 +139,22 @@ const TreatmentPage: React.FC = () => {
       
       if (success) {
         toast.success('Treatment saved successfully');
-        // Reset form instead of navigating away
+        
+        // Invalidate query cache to ensure fresh data on next fetch
+        queryClient.invalidateQueries({ queryKey: ['animal', animalId] });
+        
+        // Update animal data in the database if pen changed
+        if (formData.moveTo && formData.moveTo !== animal?.pen_id) {
+          console.log('Updating animal pen:', formData.moveTo);
+          
+          // Also invalidate any queries that may use the animal's lot
+          if (animal?.lot_id) {
+            queryClient.invalidateQueries({ queryKey: ['animals', animal.lot_id] });
+            queryClient.invalidateQueries({ queryKey: ['pens', animal.lot_id] });
+          }
+        }
+        
+        // Reset form
         setFormData({
           diagnosisId: '',
           treatmentId: '',

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Animal, Pen, Lot, Treatment, TreatmentFormData } from '../types';
 
@@ -226,17 +227,38 @@ export const saveTreatment = async (animalId: string, formData: TreatmentFormDat
       return false;
     }
     
-    // Update animal's pen if moved
+    // Get the current animal data to update treatment counts
+    const { data: animalData, error: animalFetchError } = await supabase
+      .from('animals')
+      .select('pulls, re_treat')
+      .eq('id', animalId)
+      .single();
+      
+    if (animalFetchError) {
+      console.error('Error fetching animal for update:', animalFetchError);
+      // Still return true as the treatment was saved
+      return true;
+    }
+
+    // Update animal's pen and increment treatment counts
+    const updateData: any = {
+      // Always increment the reTreat count when a treatment is added
+      re_treat: (animalData?.re_treat || 0) + 1,
+    };
+    
+    // Only update pen_id if specified
     if (formData.moveTo) {
-      const { error: penUpdateError } = await supabase
-        .from('animals')
-        .update({ pen_id: formData.moveTo })
-        .eq('id', animalId);
+      updateData.pen_id = formData.moveTo;
+    }
+    
+    const { error: animalUpdateError } = await supabase
+      .from('animals')
+      .update(updateData)
+      .eq('id', animalId);
         
-      if (penUpdateError) {
-        console.error('Error updating animal pen:', penUpdateError);
-        // We still return true as the treatment was saved
-      }
+    if (animalUpdateError) {
+      console.error('Error updating animal data:', animalUpdateError);
+      // We still return true as the treatment was saved
     }
     
     return true;
