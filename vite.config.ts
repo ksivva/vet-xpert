@@ -21,4 +21,15 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Add proper MIME type configuration for JavaScript modules
+  build: {
+    rollupOptions: {
+      output: {
+        // Ensure proper MIME types are used
+        entryFileNames: 'assets/[name].[hash].js',
+        chunkFileNames: 'assets/[name].[hash].js',
+        assetFileNames: 'assets/[name].[hash].[ext]'
+      }
+    }
+  }
 }));
