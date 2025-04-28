@@ -44,6 +44,51 @@ export type Database = {
           },
         ]
       }
+      animal_realizations: {
+        Row: {
+          animal_id: string
+          created_at: string
+          id: string
+          price: number | null
+          realization_date: string
+          reason_id: string
+          weight: number | null
+        }
+        Insert: {
+          animal_id: string
+          created_at?: string
+          id?: string
+          price?: number | null
+          realization_date?: string
+          reason_id: string
+          weight?: number | null
+        }
+        Update: {
+          animal_id?: string
+          created_at?: string
+          id?: string
+          price?: number | null
+          realization_date?: string
+          reason_id?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "animal_realizations_animal_id_fkey"
+            columns: ["animal_id"]
+            isOneToOne: false
+            referencedRelation: "animals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "animal_realizations_reason_id_fkey"
+            columns: ["reason_id"]
+            isOneToOne: false
+            referencedRelation: "diagnoses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       animal_treatments: {
         Row: {
           animal_id: string

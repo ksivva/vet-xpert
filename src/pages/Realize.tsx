@@ -13,13 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-
-interface RealizeFormData {
-  reasonId: string;
-  weight: string;
-  price: string; 
-  date: string;
-}
+import { RealizeFormData } from '../types';
 
 const RealizePage: React.FC = () => {
   const { animalId } = useParams<{ animalId: string }>();
@@ -77,11 +71,10 @@ const RealizePage: React.FC = () => {
 
   // Update form data when animal data is loaded
   useEffect(() => {
-    if (animal) {
-      // Pre-fill the weight if we have animal data
+    if (animal && animal.weight) {
       setFormData(prev => ({
         ...prev,
-        weight: animal.current_weight?.toString() || ''
+        weight: animal.weight?.toString() || ''
       }));
     }
   }, [animal]);

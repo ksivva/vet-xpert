@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Animal, Pen, Lot, Treatment, TreatmentFormData, DeathFormData } from '../types';
 
