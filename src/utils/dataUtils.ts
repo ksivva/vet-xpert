@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Animal, Pen, Lot, Treatment, TreatmentFormData } from '../types';
 
@@ -30,7 +29,47 @@ export const getAnimalById = async (id: string): Promise<Animal | null> => {
     rePulls: data.re_pulls,
     reTreat: data.re_treat,
     penId: data.pen_id,
-    lotId: data.lot_id
+    lotId: data.lot_id,
+    animalEid: data.animal_eid
+  };
+};
+
+export const searchAnimalByEid = async (eid: string): Promise<Animal | null> => {
+  const { data, error } = await supabase
+    .from('animals')
+    .select('*')
+    .ilike('animal_eid', `%${eid}%`)
+    .limit(1)
+    .single();
+    
+  if (error) {
+    if (error.code === 'PGRST116') {
+      // No rows returned by the query
+      console.log('No animal found with EID:', eid);
+      return null;
+    }
+    console.error('Error searching for animal by EID:', error);
+    return null;
+  }
+  
+  if (!data) return null;
+  
+  // Map from database schema to our TypeScript types
+  return {
+    id: data.id,
+    visualTag: data.visual_tag,
+    gender: (data.gender === 'Steer' || data.gender === 'Cow') 
+      ? data.gender as 'Steer' | 'Cow'
+      : 'Steer',
+    daysOnFeed: data.days_on_feed,
+    daysToShip: data.days_to_ship,
+    ltdTreatmentCost: data.ltd_treatment_cost,
+    pulls: data.pulls,
+    rePulls: data.re_pulls,
+    reTreat: data.re_treat,
+    penId: data.pen_id,
+    lotId: data.lot_id,
+    animalEid: data.animal_eid
   };
 };
 

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Animal } from '../types';
@@ -17,7 +18,10 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal, onClick }) => {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
         <div>
           <h3 className="text-lg sm:text-xl font-bold">{animal.visualTag}</h3>
-          <p className="text-gray-500">{animal.gender}</p>
+          <div className="text-gray-500">
+            {animal.gender}
+            {animal.animalEid && <span className="ml-2">• EID: {animal.animalEid}</span>}
+          </div>
         </div>
         <span className="inline-block bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
           {animal.pulls > 0 ? `Pulls: ${animal.pulls}` : 'No Pulls'}

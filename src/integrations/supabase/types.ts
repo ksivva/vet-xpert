@@ -79,6 +79,7 @@ export type Database = {
       }
       animals: {
         Row: {
+          animal_eid: string | null
           days_on_feed: number
           days_to_ship: number
           gender: string | null
@@ -92,6 +93,7 @@ export type Database = {
           visual_tag: string
         }
         Insert: {
+          animal_eid?: string | null
           days_on_feed: number
           days_to_ship: number
           gender?: string | null
@@ -105,6 +107,7 @@ export type Database = {
           visual_tag: string
         }
         Update: {
+          animal_eid?: string | null
           days_on_feed?: number
           days_to_ship?: number
           gender?: string | null

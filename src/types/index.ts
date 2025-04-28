@@ -1,4 +1,3 @@
-
 export interface Animal {
   id: string;
   visualTag: string;
@@ -11,6 +10,7 @@ export interface Animal {
   reTreat: number;
   penId: string;
   lotId: string;
+  animalEid?: string;
 }
 
 export interface Pen {

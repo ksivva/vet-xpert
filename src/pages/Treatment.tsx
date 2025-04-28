@@ -208,7 +208,7 @@ const TreatmentPage: React.FC = () => {
             </span>
           </div>
           <p className="text-sm text-gray-500">
-            {animal.gender} • DOF: {animal.days_on_feed} days • Days to Ship: {animal.days_to_ship}
+            {animal.gender} • {animal.animal_eid ? `EID: ${animal.animal_eid} •` : ''} DOF: {animal.days_on_feed} days • Days to Ship: {animal.days_to_ship}
           </p>
         </div>
         

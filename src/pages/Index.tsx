@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -11,6 +10,7 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Barcode, Search } from 'lucide-react';
+import { searchAnimalByEid } from '../utils/dataUtils';
 
 const Index: React.FC = () => {
   const navigate = useNavigate();
@@ -22,6 +22,7 @@ const Index: React.FC = () => {
   );
   const [animalEid, setAnimalEid] = useState<string>('');
   const [filteredAnimals, setFilteredAnimals] = useState<Animal[]>([]);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
 
   // Fetch lots
   const { data: lots } = useQuery({
@@ -93,7 +94,8 @@ const Index: React.FC = () => {
         rePulls: animal.re_pulls,
         reTreat: animal.re_treat,
         penId: animal.pen_id,
-        lotId: animal.lot_id
+        lotId: animal.lot_id,
+        animalEid: animal.animal_eid
       })));
     };
 
@@ -133,28 +135,32 @@ const Index: React.FC = () => {
     const mockScannedEid = `EID-${Math.floor(Math.random() * 10000)}`;
     setAnimalEid(mockScannedEid);
     toast.info(`Scanned EID: ${mockScannedEid}`);
-    
-    // In a real app, you might want to search for this animal in the database
-    // and navigate to its treatment page if found
   };
 
   // Handle search by EID
-  const handleSearchByEid = () => {
+  const handleSearchByEid = async () => {
     if (!animalEid.trim()) {
       toast.warning('Please enter or scan an Animal EID');
       return;
     }
 
-    // In a real app, this would query the database for the animal with this EID
-    // For now, we'll just simulate finding it or not
+    setIsSearching(true);
     toast.info(`Searching for animal with EID: ${animalEid}`);
     
-    // Example implementation:
-    // searchAnimalByEid(animalEid)
-    //   .then(animal => {
-    //     if (animal) navigate(`/treatment/${animal.id}`);
-    //     else toast.error('Animal not found');
-    //   });
+    try {
+      const animal = await searchAnimalByEid(animalEid);
+      
+      if (animal) {
+        navigate(`/treatment/${animal.id}`);
+      } else {
+        toast.error('Animal not found with the given EID');
+      }
+    } catch (error) {
+      console.error('Error searching for animal:', error);
+      toast.error('Failed to search for animal');
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   return (
@@ -170,6 +176,11 @@ const Index: React.FC = () => {
                 placeholder="Enter Animal EID"
                 value={animalEid}
                 onChange={(e) => setAnimalEid(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearchByEid();
+                  }
+                }}
               />
             </div>
             <Button 
@@ -184,9 +195,16 @@ const Index: React.FC = () => {
               type="button"
               onClick={handleSearchByEid}
               className="flex-shrink-0"
+              disabled={isSearching}
             >
-              <Search className="h-5 w-5 mr-1" />
-              Search
+              {isSearching ? (
+                <span className="animate-pulse">Searching...</span>
+              ) : (
+                <>
+                  <Search className="h-5 w-5 mr-1" />
+                  Search
+                </>
+              )}
             </Button>
           </div>
         </div>
