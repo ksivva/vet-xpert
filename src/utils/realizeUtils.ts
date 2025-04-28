@@ -44,7 +44,7 @@ export const saveRealization = async (animalId: string, formData: RealizeFormDat
   }
 };
 
-// Add a function to retrieve realization details for an animal
+// Function to retrieve realization details for an animal
 export const getRealizationDetails = async (animalId: string) => {
   try {
     const { data, error } = await supabase

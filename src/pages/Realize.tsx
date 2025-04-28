@@ -45,20 +45,25 @@ const RealizePage: React.FC = () => {
   // Fetch reasons when component mounts
   useEffect(() => {
     const fetchReasons = async () => {
-      const { data, error } = await supabase
-        .from('diagnoses')
-        .select('id, name');
-      
-      if (error) {
-        console.error('Error fetching reasons:', error);
+      try {
+        const { data, error } = await supabase
+          .from('diagnoses')
+          .select('id, name');
+        
+        if (error) {
+          console.error('Error fetching reasons:', error);
+          toast.error('Failed to load reasons');
+          return;
+        }
+        
+        setReasons(data.map(reason => ({
+          value: reason.id,
+          label: reason.name
+        })));
+      } catch (error) {
+        console.error('Error in fetchReasons:', error);
         toast.error('Failed to load reasons');
-        return;
       }
-      
-      setReasons(data.map(reason => ({
-        value: reason.id,
-        label: reason.name
-      })));
     };
 
     fetchReasons();
