@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
 import Layout from '../components/Layout';
@@ -24,7 +23,6 @@ const Index: React.FC = () => {
   const [filteredAnimals, setFilteredAnimals] = useState<Animal[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
-  // Fetch lots
   const { data: lots } = useQuery({
     queryKey: ['lots'],
     queryFn: async () => {
@@ -39,7 +37,6 @@ const Index: React.FC = () => {
     }
   });
 
-  // Fetch pens based on selected lot
   const { data: pens } = useQuery({
     queryKey: ['pens', selectedLotId],
     queryFn: async () => {
@@ -58,10 +55,8 @@ const Index: React.FC = () => {
     enabled: !!selectedLotId
   });
 
-  // Fetch animals based on filters
   useEffect(() => {
     const fetchAnimals = async () => {
-      // Only fetch animals if both lot and pen are selected
       if (!selectedLotId || !selectedPenId) {
         setFilteredAnimals([]);
         return;
@@ -102,7 +97,6 @@ const Index: React.FC = () => {
     fetchAnimals();
   }, [selectedLotId, selectedPenId]);
 
-  // Update localStorage when selections change
   useEffect(() => {
     localStorage.setItem('selectedLotId', selectedLotId);
   }, [selectedLotId]);
@@ -111,33 +105,26 @@ const Index: React.FC = () => {
     localStorage.setItem('selectedPenId', selectedPenId);
   }, [selectedPenId]);
 
-  // Handle lot selection
   const handleLotChange = (lotId: string) => {
     setSelectedLotId(lotId);
     setSelectedPenId('');
-    localStorage.removeItem('selectedPenId'); // Clear pen when lot changes
+    localStorage.removeItem('selectedPenId');
   };
 
-  // Handle pen selection
   const handlePenChange = (penId: string) => {
     setSelectedPenId(penId);
   };
 
-  // Handle treatment button click
   const handleStartTreatment = (animal: Animal) => {
     navigate(`/treatment/${animal.id}`);
   };
 
-  // Handle barcode scan button click
   const handleBarcodeScan = () => {
-    // In a real application, this would trigger the device's camera/scanner
-    // For now, we'll just simulate a scan by populating with a sample EID
     const mockScannedEid = `EID-${Math.floor(Math.random() * 10000)}`;
     setAnimalEid(mockScannedEid);
     toast.info(`Scanned EID: ${mockScannedEid}`);
   };
 
-  // Handle search by EID
   const handleSearchByEid = async () => {
     if (!animalEid.trim()) {
       toast.warning('Please enter or scan an Animal EID');
@@ -166,7 +153,6 @@ const Index: React.FC = () => {
   return (
     <Layout title="VetXpert">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        {/* EID Search Section */}
         <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-100">
           <h2 className="text-lg font-semibold mb-4">Find Animal by EID</h2>
           <div className="flex space-x-2">
@@ -209,7 +195,6 @@ const Index: React.FC = () => {
           </div>
         </div>
 
-        {/* Search Filters */}
         <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-100">
           <h2 className="text-lg font-semibold mb-4">Find Animal by Location</h2>
           
@@ -239,7 +224,6 @@ const Index: React.FC = () => {
           </div>
         </div>
 
-        {/* Animal List */}
         {filteredAnimals.length > 0 ? (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">Animals</h2>
@@ -248,7 +232,6 @@ const Index: React.FC = () => {
                 <AnimalCard 
                   key={animal.id} 
                   animal={animal}
-                  onClick={() => handleStartTreatment(animal)}
                 />
               ))}
             </div>
