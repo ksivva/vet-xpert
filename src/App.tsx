@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Treatment from "./pages/Treatment";
 import Dead from "./pages/Dead";
+import Realize from "./pages/Realize";
 import NotFound from "./pages/NotFound";
 import './App.css';
 
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/treatment/:animalId" element={<Treatment />} />
               <Route path="/dead/:animalId" element={<Dead />} />
+              <Route path="/realize/:animalId" element={<Realize />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>

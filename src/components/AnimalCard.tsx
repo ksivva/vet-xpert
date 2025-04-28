@@ -35,10 +35,11 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
   };
 
   const handleRealize = () => {
-    toast.info("Realize functionality not yet implemented");
+    navigate(`realize/${animal.id}`);
   };
 
   const isDead = animal.status === 'dead';
+  const isRealized = animal.status === 'realized';
 
   return (
     <div 
@@ -54,6 +55,11 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
           {isDead && (
             <span className="inline-block bg-red-500 text-white px-2 py-0.5 rounded-full text-xs mt-1">
               Dead
+            </span>
+          )}
+          {isRealized && (
+            <span className="inline-block bg-orange-500 text-white px-2 py-0.5 rounded-full text-xs mt-1">
+              Realized
             </span>
           )}
         </div>
@@ -90,7 +96,7 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
               size="sm" 
               onClick={handleTreat} 
               className="bg-blue-500 hover:bg-blue-600"
-              disabled={isDead}
+              disabled={isDead || isRealized}
             >
               <Heart size={16} className="mr-1" /> Treat
             </Button>
@@ -98,17 +104,18 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
               size="sm" 
               variant="destructive"
               onClick={handleDead} 
-              disabled={false} // Always allow viewing/editing death records
+              disabled={isRealized} // Allow viewing/editing death records unless realized
             >
               <Skull size={16} className="mr-1" /> {isDead ? 'View Death' : 'Dead'}
             </Button>
             <Button 
               size="sm" 
               variant="secondary"
-              onClick={handleRealize} 
-              disabled={isDead}
+              onClick={handleRealize}
+              disabled={isDead || isRealized}
+              className={isRealized ? "bg-orange-200" : ""}
             >
-              <Check size={16} className="mr-1" /> Realize
+              <Check size={16} className="mr-1" /> {isRealized ? 'Realized' : 'Realize'}
             </Button>
           </div>
         </div>

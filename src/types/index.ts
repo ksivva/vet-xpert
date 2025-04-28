@@ -1,4 +1,3 @@
-
 export interface Animal {
   id: string;
   visualTag: string;
@@ -9,8 +8,8 @@ export interface Animal {
   pulls: number;
   rePulls: number;
   reTreat: number;
-  penId: string;
-  lotId: string;
+  penId?: string;
+  lotId?: string;
   animalEid?: string;
   status?: 'active' | 'dead' | 'realized';
 }
@@ -58,4 +57,11 @@ export type Severity = 'Critical' | 'Medium' | 'Low';
 export interface User {
   id: string;
   name: string;
+}
+
+export interface RealizeFormData {
+  reasonId: string;
+  weight: string;
+  price: string;
+  date: string;
 }
