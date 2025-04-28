@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -7,6 +8,9 @@ import SelectField from '../components/SelectField';
 import AnimalCard from '../components/AnimalCard';
 import { Animal } from '../types';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Barcode, Search } from 'lucide-react';
 
 const Index: React.FC = () => {
   const navigate = useNavigate();
@@ -16,6 +20,7 @@ const Index: React.FC = () => {
   const [selectedPenId, setSelectedPenId] = useState<string>(() => 
     localStorage.getItem('selectedPenId') || ''
   );
+  const [animalEid, setAnimalEid] = useState<string>('');
   const [filteredAnimals, setFilteredAnimals] = useState<Animal[]>([]);
 
   // Fetch lots
@@ -121,12 +126,74 @@ const Index: React.FC = () => {
     navigate(`/treatment/${animal.id}`);
   };
 
+  // Handle barcode scan button click
+  const handleBarcodeScan = () => {
+    // In a real application, this would trigger the device's camera/scanner
+    // For now, we'll just simulate a scan by populating with a sample EID
+    const mockScannedEid = `EID-${Math.floor(Math.random() * 10000)}`;
+    setAnimalEid(mockScannedEid);
+    toast.info(`Scanned EID: ${mockScannedEid}`);
+    
+    // In a real app, you might want to search for this animal in the database
+    // and navigate to its treatment page if found
+  };
+
+  // Handle search by EID
+  const handleSearchByEid = () => {
+    if (!animalEid.trim()) {
+      toast.warning('Please enter or scan an Animal EID');
+      return;
+    }
+
+    // In a real app, this would query the database for the animal with this EID
+    // For now, we'll just simulate finding it or not
+    toast.info(`Searching for animal with EID: ${animalEid}`);
+    
+    // Example implementation:
+    // searchAnimalByEid(animalEid)
+    //   .then(animal => {
+    //     if (animal) navigate(`/treatment/${animal.id}`);
+    //     else toast.error('Animal not found');
+    //   });
+  };
+
   return (
     <Layout title="VetXpert">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* EID Search Section */}
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-100">
+          <h2 className="text-lg font-semibold mb-4">Find Animal by EID</h2>
+          <div className="flex space-x-2">
+            <div className="flex-grow">
+              <Input
+                type="text"
+                placeholder="Enter Animal EID"
+                value={animalEid}
+                onChange={(e) => setAnimalEid(e.target.value)}
+              />
+            </div>
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={handleBarcodeScan}
+              className="flex-shrink-0"
+            >
+              <Barcode className="h-5 w-5" />
+            </Button>
+            <Button 
+              type="button"
+              onClick={handleSearchByEid}
+              className="flex-shrink-0"
+            >
+              <Search className="h-5 w-5 mr-1" />
+              Search
+            </Button>
+          </div>
+        </div>
+
         {/* Search Filters */}
         <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-100">
-          <h2 className="text-lg font-semibold mb-4">Find Animal</h2>
+          <h2 className="text-lg font-semibold mb-4">Find Animal by Location</h2>
           
           <div className="space-y-4">
             <SelectField
