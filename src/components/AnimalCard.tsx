@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { Check, Heart, Skull } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Animal } from '../types';
-import { formatCurrency, getWeekCount } from '../utils/dataUtils';
+import { formatCurrency, getWeekCount } from '../utils/formatUtils';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import SelectField from '../components/SelectField';
 import DatePickerField from './DatePickerField';
 import { RealizeFormData } from '../types';
-import { supabase } from '@/integrations/supabase/client';
+import { saveRealization } from '../utils/realizeUtils';
 
 interface RealizeFormProps {
   animalId: string;
@@ -62,49 +61,22 @@ const RealizeForm: React.FC<RealizeFormProps> = ({ animalId, reasons, animal }) 
     setIsSubmitting(true);
     
     try {
-      // Save the realization record
-      const { error: realizationError } = await supabase
-        .from('animal_realizations')
-        .insert({
-          animal_id: animalId,
-          reason_id: formData.reasonId,
-          weight: formData.weight ? parseFloat(formData.weight) : null,
-          price: formData.price ? parseFloat(formData.price) : null,
-          realization_date: formData.date
-        });
+      const success = await saveRealization(animalId, formData);
+      
+      if (success) {
+        toast.success('Animal has been realized successfully');
         
-      if (realizationError) {
-        console.error('Error saving realization:', realizationError);
+        // Invalidate queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ['animal', animalId] });
+        if (animal?.lot_id) {
+          queryClient.invalidateQueries({ queryKey: ['animals', animal.lot_id] });
+        }
+        
+        // Navigate back to the list
+        navigate('/');
+      } else {
         toast.error('Failed to save realization');
-        return;
       }
-      
-      // Update animal status to realized
-      const { error: animalUpdateError } = await supabase
-        .from('animals')
-        .update({
-          status: 'realized'
-        })
-        .eq('id', animalId);
-      
-      if (animalUpdateError) {
-        console.error('Error updating animal status:', animalUpdateError);
-        // Still show success since the realization record was saved
-      }
-      
-      toast.success('Animal has been realized successfully');
-      
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['animal', animalId] });
-      if (animal?.lot_id) {
-        queryClient.invalidateQueries({ queryKey: ['animals', animal.lot_id] });
-      }
-      
-      // Navigate back to the list
-      navigate('/');
-    } catch (error) {
-      console.error('Error in realization submission:', error);
-      toast.error('An error occurred while saving the realization');
     } finally {
       setIsSubmitting(false);
     }
