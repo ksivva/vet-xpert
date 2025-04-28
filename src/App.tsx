@@ -11,13 +11,23 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Match the base URL from vite.config.ts for GitHub Pages deployment
+// Determine the base path for routing based on environment
+// Remove trailing slash for proper route handling
+const getBasename = () => {
+  // In production, use the vet-xpert path
+  if (import.meta.env.PROD) {
+    return "/vet-xpert";
+  }
+  // In development, use root path
+  return "";
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter basename="/vet-xpert">
+      <BrowserRouter basename={getBasename()}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/treatment/:animalId" element={<Treatment />} />

@@ -23,13 +23,15 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
     });
   }, [animal]);
 
+  // Use path-based navigation without leading slashes for compatibility
+  // with both development and production environments
   const handleTreat = () => {
-    navigate(`/treatment/${animal.id}`);
+    navigate(`treatment/${animal.id}`);
   };
 
   const handleDead = () => {
-    console.log(`Navigating to /dead/${animal.id}`);
-    navigate(`/dead/${animal.id}`);
+    console.log(`Navigating to dead/${animal.id}`);
+    navigate(`dead/${animal.id}`);
   };
 
   const handleRealize = () => {
