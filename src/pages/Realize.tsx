@@ -54,7 +54,7 @@ const RealizePage: React.FC = () => {
 
   if (isLoadingAnimal) {
     return (
-      <Layout title="Realize Animal" showBackButton>
+      <Layout title="Animal Realization" showBackButton>
         <div className="text-center py-10">
           <p className="text-gray-500">Loading animal data...</p>
         </div>
@@ -64,7 +64,7 @@ const RealizePage: React.FC = () => {
 
   if (!animal) {
     return (
-      <Layout title="Realize Animal" showBackButton>
+      <Layout title="Animal Realization" showBackButton>
         <div className="text-center py-10">
           <p className="text-gray-500">Animal not found</p>
         </div>
@@ -73,7 +73,7 @@ const RealizePage: React.FC = () => {
   }
 
   return (
-    <Layout title={`Realize ${animal.visual_tag}`} showBackButton>
+    <Layout title={`Realize Animal ${animal.visual_tag}`} showBackButton>
       <Card className="w-full mb-6">
         <AnimalInfoCard animal={animal} />
         

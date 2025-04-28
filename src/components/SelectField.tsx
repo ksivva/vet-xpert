@@ -37,7 +37,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
           id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vetxpert-purple bg-white appearance-none text-sm sm:text-base"
+          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-vetxpert-purple bg-white appearance-none text-sm sm:text-base font-normal"
           disabled={disabled}
           required={required}
         >

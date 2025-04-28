@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -91,7 +92,6 @@ const RealizeForm: React.FC<RealizeFormProps> = ({ animalId, reasons, animal }) 
         options={reasons}
         onChange={(value) => handleChange('reasonId', value)}
         required
-        className="text-red-500 font-medium"
       />
       
       <div className="space-y-2">

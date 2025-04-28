@@ -23,6 +23,7 @@ const Index: React.FC = () => {
   );
   const [animalEid, setAnimalEid] = useState<string>('');
   const [filteredAnimals, setFilteredAnimals] = useState<Animal[]>([]);
+  const [searchedAnimal, setSearchedAnimal] = useState<Animal | null>(null);
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
   const { data: lots } = useQuery({
@@ -92,7 +93,10 @@ const Index: React.FC = () => {
         reTreat: animal.re_treat,
         penId: animal.pen_id,
         lotId: animal.lot_id,
-        animalEid: animal.animal_eid
+        animalEid: animal.animal_eid,
+        status: (animal.status === 'active' || animal.status === 'dead' || animal.status === 'realized') 
+          ? animal.status as 'active' | 'dead' | 'realized'
+          : 'active'
       })));
     };
 
@@ -111,10 +115,12 @@ const Index: React.FC = () => {
     setSelectedLotId(lotId);
     setSelectedPenId('');
     localStorage.removeItem('selectedPenId');
+    setSearchedAnimal(null);
   };
 
   const handlePenChange = (penId: string) => {
     setSelectedPenId(penId);
+    setSearchedAnimal(null);
   };
 
   const handleStartTreatment = (animal: Animal) => {
@@ -140,13 +146,22 @@ const Index: React.FC = () => {
       const animal = await searchAnimalByEid(animalEid);
       
       if (animal) {
-        navigate(`/treatment/${animal.id}`);
+        setSearchedAnimal(animal);
+        
+        // Reset location filters as we found the animal by EID
+        setSelectedLotId('');
+        setSelectedPenId('');
+        localStorage.removeItem('selectedLotId');
+        localStorage.removeItem('selectedPenId');
+        setFilteredAnimals([]);
       } else {
+        setSearchedAnimal(null);
         toast.error('Animal not found with the given EID');
       }
     } catch (error) {
       console.error('Error searching for animal:', error);
       toast.error('Failed to search for animal');
+      setSearchedAnimal(null);
     } finally {
       setIsSearching(false);
     }
@@ -195,6 +210,13 @@ const Index: React.FC = () => {
               )}
             </Button>
           </div>
+          
+          {searchedAnimal && (
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold mb-2">Search Result</h3>
+              <AnimalCard animal={searchedAnimal} />
+            </div>
+          )}
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-100">
@@ -239,15 +261,17 @@ const Index: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="text-center py-10">
-            <p className="text-gray-500">
-              {!selectedLotId
-                ? 'Please select a Lot to view animals.'
-                : !selectedPenId
-                ? 'Please select a Pen to view animals.'
-                : 'No animals found in the selected location.'}
-            </p>
-          </div>
+          !searchedAnimal && (
+            <div className="text-center py-10">
+              <p className="text-gray-500">
+                {!selectedLotId
+                  ? 'Please select a Lot to view animals.'
+                  : !selectedPenId
+                  ? 'Please select a Pen to view animals.'
+                  : 'No animals found in the selected location.'}
+              </p>
+            </div>
+          )
         )}
       </div>
     </Layout>
