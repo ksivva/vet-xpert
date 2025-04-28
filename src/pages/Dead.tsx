@@ -37,19 +37,28 @@ const DeadPage: React.FC = () => {
       if (!animalId) return;
       
       try {
+        console.log('Fetching animal data for ID:', animalId);
         const animalData = await getAnimalById(animalId);
+        console.log('Received animal data:', animalData);
+        
         if (animalData) {
           setAnimal(animalData);
           
           // Check if animal already has a death record
+          console.log('Checking for death record...');
           const deathRecord = await getDeathRecordByAnimalId(animalId);
+          console.log('Death record:', deathRecord);
+          
           if (deathRecord) {
+            console.log('Found existing death record:', deathRecord);
             setFormData({
               reason: deathRecord.reason,
               necropsy: deathRecord.necropsy,
               deathDate: deathRecord.deathDate
             });
             setExistingRecord(true);
+          } else {
+            console.log('No existing death record found');
           }
         } else {
           toast.error('Animal not found');
@@ -84,6 +93,8 @@ const DeadPage: React.FC = () => {
     setIsSubmitting(true);
     
     try {
+      console.log('Submitting death record:', { animalId, ...formData });
+      
       const success = await saveDeathRecord(animalId, {
         reason: formData.reason,
         necropsy: formData.necropsy,
@@ -91,6 +102,7 @@ const DeadPage: React.FC = () => {
       });
       
       if (success) {
+        console.log('Death record saved successfully');
         toast.success(existingRecord ? 'Death record updated successfully' : 'Death record saved successfully');
         
         // Invalidate queries to refresh data
@@ -105,6 +117,7 @@ const DeadPage: React.FC = () => {
         // Navigate back to home page
         navigate('/');
       } else {
+        console.error('Failed to save death record');
         toast.error('Failed to save death record');
       }
     } catch (error) {

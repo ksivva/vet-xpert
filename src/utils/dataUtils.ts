@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Animal, Pen, Lot, Treatment, TreatmentFormData, DeathFormData } from '../types';
 
@@ -291,6 +292,7 @@ export const saveTreatment = async (animalId: string, formData: TreatmentFormDat
 
 export const getDeathRecordByAnimalId = async (animalId: string): Promise<DeathFormData | null> => {
   try {
+    console.log('Fetching death record for animal ID:', animalId);
     const { data, error } = await supabase
       .from('animal_deaths')
       .select('*')
@@ -304,8 +306,12 @@ export const getDeathRecordByAnimalId = async (animalId: string): Promise<DeathF
       return null;
     }
     
-    if (!data) return null;
+    if (!data) {
+      console.log('No death record found for animal ID:', animalId);
+      return null;
+    }
     
+    console.log('Found death record:', data);
     return {
       reason: data.reason,
       necropsy: data.necropsy,
@@ -319,6 +325,8 @@ export const getDeathRecordByAnimalId = async (animalId: string): Promise<DeathF
 
 export const saveDeathRecord = async (animalId: string, formData: DeathFormData): Promise<boolean> => {
   try {
+    console.log('Saving death record for animal ID:', animalId, formData);
+    
     const { data: existingRecord } = await supabase
       .from('animal_deaths')
       .select('id')
@@ -327,6 +335,7 @@ export const saveDeathRecord = async (animalId: string, formData: DeathFormData)
       
     if (existingRecord) {
       // Update existing record
+      console.log('Updating existing death record ID:', existingRecord.id);
       const { error: updateError } = await supabase
         .from('animal_deaths')
         .update({
@@ -340,8 +349,11 @@ export const saveDeathRecord = async (animalId: string, formData: DeathFormData)
         console.error('Error updating death record:', updateError);
         return false;
       }
+      
+      console.log('Death record updated successfully');
     } else {
       // Insert new record
+      console.log('Creating new death record');
       const { error: deathRecordError } = await supabase
         .from('animal_deaths')
         .insert({
@@ -356,6 +368,8 @@ export const saveDeathRecord = async (animalId: string, formData: DeathFormData)
         return false;
       }
       
+      console.log('New death record created successfully');
+      
       // Update animal status to dead
       const { error: animalUpdateError } = await supabase
         .from('animals')
@@ -368,6 +382,8 @@ export const saveDeathRecord = async (animalId: string, formData: DeathFormData)
         console.error('Error updating animal status:', animalUpdateError);
         return true; // Still return true as the death record was created
       }
+      
+      console.log('Animal status updated to dead');
     }
     
     return true;
