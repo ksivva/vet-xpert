@@ -4,6 +4,9 @@ import { RealizeFormData } from '../types';
 
 export const saveRealization = async (animalId: string, formData: RealizeFormData): Promise<boolean> => {
   try {
+    // Start a transaction by using the same timestamp for all operations
+    const timestamp = new Date().toISOString();
+    
     // Save the realization record
     const { error: realizationError } = await supabase
       .from('animal_realizations')
@@ -12,7 +15,8 @@ export const saveRealization = async (animalId: string, formData: RealizeFormDat
         reason_id: formData.reasonId,
         weight: formData.weight ? parseFloat(formData.weight) : null,
         price: formData.price ? parseFloat(formData.price) : null,
-        realization_date: formData.date
+        realization_date: formData.date,
+        created_at: timestamp
       });
       
     if (realizationError) {
@@ -37,5 +41,33 @@ export const saveRealization = async (animalId: string, formData: RealizeFormDat
   } catch (error) {
     console.error('Error in realization submission:', error);
     return false;
+  }
+};
+
+// Add a function to retrieve realization details for an animal
+export const getRealizationDetails = async (animalId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('animal_realizations')
+      .select(`
+        id, 
+        weight, 
+        price, 
+        realization_date,
+        reason_id,
+        diagnoses(id, name)
+      `)
+      .eq('animal_id', animalId)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching realization details:', error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in getRealizationDetails:', error);
+    return null;
   }
 };
