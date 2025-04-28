@@ -31,7 +31,9 @@ export const getAnimalById = async (id: string): Promise<Animal | null> => {
     penId: data.pen_id,
     lotId: data.lot_id,
     animalEid: data.animal_eid,
-    status: data.status
+    status: (data.status === 'active' || data.status === 'dead' || data.status === 'realized') 
+      ? data.status as 'active' | 'dead' | 'realized'
+      : 'active'
   };
 };
 
@@ -69,7 +71,9 @@ export const searchAnimalByEid = async (eid: string): Promise<Animal | null> => 
     penId: data.pen_id,
     lotId: data.lot_id,
     animalEid: data.animal_eid,
-    status: data.status
+    status: (data.status === 'active' || data.status === 'dead' || data.status === 'realized') 
+      ? data.status as 'active' | 'dead' | 'realized'
+      : 'active'
   };
 };
 
@@ -101,7 +105,9 @@ export const getAnimalsByLotId = async (lotId: string): Promise<Animal[]> => {
     penId: item.pen_id,
     lotId: item.lot_id,
     animalEid: item.animal_eid,
-    status: item.status
+    status: (item.status === 'active' || item.status === 'dead' || item.status === 'realized') 
+      ? item.status as 'active' | 'dead' | 'realized'
+      : 'active'
   }));
 };
 
@@ -133,6 +139,8 @@ export const getAnimalsByPenId = async (penId: string): Promise<Animal[]> => {
     penId: item.pen_id,
     lotId: item.lot_id,
     animalEid: item.animal_eid,
-    status: item.status
+    status: (item.status === 'active' || item.status === 'dead' || item.status === 'realized') 
+      ? item.status as 'active' | 'dead' | 'realized'
+      : 'active'
   }));
 };
