@@ -69,15 +69,7 @@ const RealizePage: React.FC = () => {
     fetchReasons();
   }, []);
 
-  // Update form data when animal data is loaded
-  useEffect(() => {
-    if (animal && animal.weight) {
-      setFormData(prev => ({
-        ...prev,
-        weight: animal.weight?.toString() || ''
-      }));
-    }
-  }, [animal]);
+  // No need to pre-fill weight from animal data since it doesn't have a weight property
 
   const handleChange = (field: keyof RealizeFormData, value: string) => {
     setFormData(prev => ({
