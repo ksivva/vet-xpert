@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import Layout from '../components/Layout';
 import SelectField from '../components/SelectField';
 import { Button } from '@/components/ui/button';
-import { saveDeathRecord, getAnimalById } from '../utils/dataUtils';
+import { saveDeathRecord, getAnimalById, getDeathRecordByAnimalId } from '../utils/dataUtils';
 import { useQueryClient } from '@tanstack/react-query';
 
 const DeathReasons = [
@@ -24,6 +24,7 @@ const DeadPage: React.FC = () => {
   const [animal, setAnimal] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [existingRecord, setExistingRecord] = useState<boolean>(false);
   
   const [formData, setFormData] = useState({
     reason: 'Unknown',
@@ -32,26 +33,37 @@ const DeadPage: React.FC = () => {
   });
 
   useEffect(() => {
-    const fetchAnimal = async () => {
+    const fetchAnimalAndDeathRecord = async () => {
       if (!animalId) return;
       
       try {
         const animalData = await getAnimalById(animalId);
         if (animalData) {
           setAnimal(animalData);
+          
+          // Check if animal already has a death record
+          const deathRecord = await getDeathRecordByAnimalId(animalId);
+          if (deathRecord) {
+            setFormData({
+              reason: deathRecord.reason,
+              necropsy: deathRecord.necropsy,
+              deathDate: deathRecord.deathDate
+            });
+            setExistingRecord(true);
+          }
         } else {
           toast.error('Animal not found');
           navigate('/');
         }
       } catch (error) {
-        console.error('Error fetching animal:', error);
+        console.error('Error fetching animal data:', error);
         toast.error('Failed to load animal data');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchAnimal();
+    fetchAnimalAndDeathRecord();
   }, [animalId, navigate]);
 
   const handleChange = (field: string, value: string | boolean) => {
@@ -79,7 +91,7 @@ const DeadPage: React.FC = () => {
       });
       
       if (success) {
-        toast.success('Death record saved successfully');
+        toast.success(existingRecord ? 'Death record updated successfully' : 'Death record saved successfully');
         
         // Invalidate queries to refresh data
         queryClient.invalidateQueries({ queryKey: ['animal', animalId] });
@@ -118,9 +130,17 @@ const DeadPage: React.FC = () => {
   }
 
   return (
-    <Layout title={`Record Death: ${animal?.visualTag || ''}`} showBackButton>
+    <Layout title={`${existingRecord ? 'Update' : 'Record'} Death: ${animal?.visualTag || ''}`} showBackButton>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+          {existingRecord && (
+            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+              <p className="text-amber-700">
+                This animal already has a death record. You are now updating the existing record.
+              </p>
+            </div>
+          )}
+          
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-lg font-semibold">Animal Details</h2>
@@ -177,7 +197,7 @@ const DeadPage: React.FC = () => {
                 className="bg-red-600 hover:bg-red-700 text-white"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Saving...' : 'Save Death Record'}
+                {isSubmitting ? 'Saving...' : existingRecord ? 'Update Death Record' : 'Save Death Record'}
               </Button>
               <Button
                 type="button"

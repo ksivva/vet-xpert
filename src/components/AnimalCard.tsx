@@ -26,6 +26,8 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
     toast.info("Realize functionality not yet implemented");
   };
 
+  const isDead = animal.status === 'dead';
+
   return (
     <div 
       className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-100 animate-fade-in hover:shadow-lg transition-shadow"
@@ -37,6 +39,11 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
             {animal.gender}
             {animal.animalEid && <span className="ml-2">• EID: {animal.animalEid}</span>}
           </div>
+          {isDead && (
+            <span className="inline-block bg-red-500 text-white px-2 py-0.5 rounded-full text-xs mt-1">
+              Dead
+            </span>
+          )}
         </div>
         <span className="inline-block bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
           {animal.pulls > 0 ? `Pulls: ${animal.pulls}` : 'No Pulls'}
@@ -71,6 +78,7 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
               size="sm" 
               onClick={handleTreat} 
               className="bg-blue-500 hover:bg-blue-600"
+              disabled={isDead}
             >
               <Heart size={16} className="mr-1" /> Treat
             </Button>
@@ -78,13 +86,15 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
               size="sm" 
               variant="destructive"
               onClick={handleDead} 
+              disabled={false} // Always allow viewing/editing death records
             >
-              <Skull size={16} className="mr-1" /> Dead
+              <Skull size={16} className="mr-1" /> {isDead ? 'View Death' : 'Dead'}
             </Button>
             <Button 
               size="sm" 
               variant="secondary"
               onClick={handleRealize} 
+              disabled={isDead}
             >
               <Check size={16} className="mr-1" /> Realize
             </Button>

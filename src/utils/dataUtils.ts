@@ -289,32 +289,85 @@ export const saveTreatment = async (animalId: string, formData: TreatmentFormDat
   }
 };
 
-export const saveDeathRecord = async (animalId: string, formData: DeathFormData): Promise<boolean> => {
+export const getDeathRecordByAnimalId = async (animalId: string): Promise<DeathFormData | null> => {
   try {
-    const { error: deathRecordError } = await supabase
+    const { data, error } = await supabase
       .from('animal_deaths')
-      .insert({
-        animal_id: animalId,
-        reason: formData.reason,
-        necropsy: formData.necropsy,
-        death_date: formData.deathDate
-      });
+      .select('*')
+      .eq('animal_id', animalId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
       
-    if (deathRecordError) {
-      console.error('Error inserting death record:', deathRecordError);
-      return false;
+    if (error) {
+      console.error('Error fetching death record:', error);
+      return null;
     }
     
-    const { error: animalUpdateError } = await supabase
-      .from('animals')
-      .update({
-        status: 'dead'
-      })
-      .eq('id', animalId);
+    if (!data) return null;
+    
+    return {
+      reason: data.reason,
+      necropsy: data.necropsy,
+      deathDate: data.death_date
+    };
+  } catch (error) {
+    console.error('Exception fetching death record:', error);
+    return null;
+  }
+};
+
+export const saveDeathRecord = async (animalId: string, formData: DeathFormData): Promise<boolean> => {
+  try {
+    const { data: existingRecord } = await supabase
+      .from('animal_deaths')
+      .select('id')
+      .eq('animal_id', animalId)
+      .maybeSingle();
+      
+    if (existingRecord) {
+      // Update existing record
+      const { error: updateError } = await supabase
+        .from('animal_deaths')
+        .update({
+          reason: formData.reason,
+          necropsy: formData.necropsy,
+          death_date: formData.deathDate
+        })
+        .eq('id', existingRecord.id);
         
-    if (animalUpdateError) {
-      console.error('Error updating animal status:', animalUpdateError);
-      return true;
+      if (updateError) {
+        console.error('Error updating death record:', updateError);
+        return false;
+      }
+    } else {
+      // Insert new record
+      const { error: deathRecordError } = await supabase
+        .from('animal_deaths')
+        .insert({
+          animal_id: animalId,
+          reason: formData.reason,
+          necropsy: formData.necropsy,
+          death_date: formData.deathDate
+        });
+        
+      if (deathRecordError) {
+        console.error('Error inserting death record:', deathRecordError);
+        return false;
+      }
+      
+      // Update animal status to dead
+      const { error: animalUpdateError } = await supabase
+        .from('animals')
+        .update({
+          status: 'dead'
+        })
+        .eq('id', animalId);
+          
+      if (animalUpdateError) {
+        console.error('Error updating animal status:', animalUpdateError);
+        return true; // Still return true as the death record was created
+      }
     }
     
     return true;
