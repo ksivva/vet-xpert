@@ -11,15 +11,13 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Use the base URL from import.meta.env for consistency across environments
-const baseUrl = import.meta.env.BASE_URL || "/vet-xpert/";
-
+// Use a simpler base URL approach that works across environments
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter basename={baseUrl}>
+      <BrowserRouter basename="/">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/treatment/:animalId" element={<Treatment />} />

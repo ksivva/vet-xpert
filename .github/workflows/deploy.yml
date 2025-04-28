@@ -30,7 +30,7 @@ jobs:
       - name: Build project
         run: npm run build
         env:
-          VITE_BASE_URL: /vet-xpert/
+          VITE_BASE_URL: "/"
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -47,7 +47,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          headers: |
-            /*
-              Content-Type: application/javascript; charset=utf-8

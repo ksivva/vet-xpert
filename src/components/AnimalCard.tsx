@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Check, Heart, Skull } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Animal } from '../types';
@@ -14,11 +14,21 @@ interface AnimalCardProps {
 const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
   const navigate = useNavigate();
 
+  // Debug log for dead/:animalId route issues
+  useEffect(() => {
+    console.log(`AnimalCard rendered for animal:`, {
+      id: animal.id,
+      visualTag: animal.visualTag,
+      status: animal.status
+    });
+  }, [animal]);
+
   const handleTreat = () => {
     navigate(`/treatment/${animal.id}`);
   };
 
   const handleDead = () => {
+    console.log(`Navigating to /dead/${animal.id}`);
     navigate(`/dead/${animal.id}`);
   };
 
