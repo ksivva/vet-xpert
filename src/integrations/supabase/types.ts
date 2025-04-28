@@ -9,6 +9,41 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      animal_deaths: {
+        Row: {
+          animal_id: string
+          created_at: string
+          death_date: string
+          id: string
+          necropsy: boolean
+          reason: string
+        }
+        Insert: {
+          animal_id: string
+          created_at?: string
+          death_date?: string
+          id?: string
+          necropsy?: boolean
+          reason: string
+        }
+        Update: {
+          animal_id?: string
+          created_at?: string
+          death_date?: string
+          id?: string
+          necropsy?: boolean
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "animal_deaths_animal_id_fkey"
+            columns: ["animal_id"]
+            isOneToOne: false
+            referencedRelation: "animals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       animal_treatments: {
         Row: {
           animal_id: string
@@ -90,6 +125,7 @@ export type Database = {
           pulls: number
           re_pulls: number
           re_treat: number
+          status: string | null
           visual_tag: string
         }
         Insert: {
@@ -104,6 +140,7 @@ export type Database = {
           pulls?: number
           re_pulls?: number
           re_treat?: number
+          status?: string | null
           visual_tag: string
         }
         Update: {
@@ -118,6 +155,7 @@ export type Database = {
           pulls?: number
           re_pulls?: number
           re_treat?: number
+          status?: string | null
           visual_tag?: string
         }
         Relationships: [

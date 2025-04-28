@@ -1,3 +1,4 @@
+
 export interface Animal {
   id: string;
   visualTag: string;
@@ -11,6 +12,7 @@ export interface Animal {
   penId: string;
   lotId: string;
   animalEid?: string;
+  status?: 'active' | 'dead' | 'realized';
 }
 
 export interface Pen {
@@ -43,6 +45,12 @@ export interface TreatmentFormData {
   severity: 'Critical' | 'Medium' | 'Low';
   date: string;
   moveTo: string;
+}
+
+export interface DeathFormData {
+  reason: string;
+  necropsy: boolean;
+  deathDate: string;
 }
 
 export type Severity = 'Critical' | 'Medium' | 'Low';

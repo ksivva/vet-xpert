@@ -19,7 +19,7 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
   };
 
   const handleDead = () => {
-    toast.info("Dead functionality not yet implemented");
+    navigate(`/dead/${animal.id}`);
   };
 
   const handleRealize = () => {

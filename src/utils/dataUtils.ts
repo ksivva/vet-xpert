@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { Animal, Pen, Lot, Treatment, TreatmentFormData } from '../types';
+import { Animal, Pen, Lot, Treatment, TreatmentFormData, DeathFormData } from '../types';
 
 export const getAnimalById = async (id: string): Promise<Animal | null> => {
   const { data, error } = await supabase
@@ -15,13 +15,12 @@ export const getAnimalById = async (id: string): Promise<Animal | null> => {
   
   if (!data) return null;
   
-  // Map from database schema to our TypeScript types, ensuring gender is the right type
   return {
     id: data.id,
     visualTag: data.visual_tag,
     gender: (data.gender === 'Steer' || data.gender === 'Cow') 
       ? data.gender as 'Steer' | 'Cow'
-      : 'Steer', // Default to 'Steer' if gender is invalid
+      : 'Steer',
     daysOnFeed: data.days_on_feed,
     daysToShip: data.days_to_ship,
     ltdTreatmentCost: data.ltd_treatment_cost,
@@ -44,7 +43,6 @@ export const searchAnimalByEid = async (eid: string): Promise<Animal | null> => 
     
   if (error) {
     if (error.code === 'PGRST116') {
-      // No rows returned by the query
       console.log('No animal found with EID:', eid);
       return null;
     }
@@ -54,7 +52,6 @@ export const searchAnimalByEid = async (eid: string): Promise<Animal | null> => 
   
   if (!data) return null;
   
-  // Map from database schema to our TypeScript types
   return {
     id: data.id,
     visualTag: data.visual_tag,
@@ -86,13 +83,12 @@ export const getAnimalsByLotId = async (lotId: string): Promise<Animal[]> => {
   
   if (!data) return [];
   
-  // Map each item from database schema to our TypeScript types, handling gender type
   return data.map(item => ({
     id: item.id,
     visualTag: item.visual_tag,
     gender: (item.gender === 'Steer' || item.gender === 'Cow') 
       ? item.gender as 'Steer' | 'Cow'
-      : 'Steer', // Default to 'Steer' if gender is invalid
+      : 'Steer',
     daysOnFeed: item.days_on_feed,
     daysToShip: item.days_to_ship,
     ltdTreatmentCost: item.ltd_treatment_cost,
@@ -117,13 +113,12 @@ export const getAnimalsByPenId = async (penId: string): Promise<Animal[]> => {
   
   if (!data) return [];
   
-  // Map each item from database schema to our TypeScript types, handling gender type
   return data.map(item => ({
     id: item.id,
     visualTag: item.visual_tag,
     gender: (item.gender === 'Steer' || item.gender === 'Cow') 
       ? item.gender as 'Steer' | 'Cow'
-      : 'Steer', // Default to 'Steer' if gender is invalid
+      : 'Steer',
     daysOnFeed: item.days_on_feed,
     daysToShip: item.days_to_ship,
     ltdTreatmentCost: item.ltd_treatment_cost,
@@ -148,7 +143,6 @@ export const getPensByLotId = async (lotId: string): Promise<Pen[]> => {
   
   if (!data) return [];
   
-  // Map each item from database schema to our TypeScript types
   return data.map(item => ({
     id: item.id,
     penNumber: item.pen_number,
@@ -170,7 +164,6 @@ export const getPenById = async (penId: string): Promise<Pen | null> => {
   
   if (!data) return null;
   
-  // Map from database schema to our TypeScript types
   return {
     id: data.id,
     penNumber: data.pen_number,
@@ -192,7 +185,6 @@ export const getLotById = async (lotId: string): Promise<Lot | null> => {
   
   if (!data) return null;
   
-  // Map from database schema to our TypeScript types
   return {
     id: data.id,
     lotNumber: data.lot_number
@@ -206,10 +198,8 @@ export const getLotByPenId = async (penId: string): Promise<Lot | null> => {
 };
 
 export const getTreatmentsByDiagnosisId = async (diagnosisId: string): Promise<Treatment[]> => {
-  // Check if we're using mock data (non-UUID strings)
   if (diagnosisId && !diagnosisId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
     console.log('Using mock treatments data for diagnosis:', diagnosisId);
-    // Return mock data for development
     return [
       { id: 'treat1', name: 'Treatment A', diagnosisIds: [diagnosisId] },
       { id: 'treat2', name: 'Treatment B', diagnosisIds: [diagnosisId] },
@@ -233,11 +223,10 @@ export const getTreatmentsByDiagnosisId = async (diagnosisId: string): Promise<T
     
     if (!data || data.length === 0) return [];
     
-    // Map each treatment and add the diagnosisId
     return data.map(item => ({
       id: item.treatments.id,
       name: item.treatments.name,
-      diagnosisIds: [diagnosisId] // We only know this diagnosis ID from this query
+      diagnosisIds: [diagnosisId]
     }));
   } catch (error) {
     console.error('Exception fetching treatments:', error);
@@ -247,7 +236,6 @@ export const getTreatmentsByDiagnosisId = async (diagnosisId: string): Promise<T
 
 export const saveTreatment = async (animalId: string, formData: TreatmentFormData): Promise<boolean> => {
   try {
-    // Insert the treatment record
     const { error: treatmentError } = await supabase
       .from('animal_treatments')
       .insert({
@@ -266,7 +254,6 @@ export const saveTreatment = async (animalId: string, formData: TreatmentFormDat
       return false;
     }
     
-    // Get the current animal data to update treatment counts
     const { data: animalData, error: animalFetchError } = await supabase
       .from('animals')
       .select('pulls, re_treat')
@@ -275,17 +262,13 @@ export const saveTreatment = async (animalId: string, formData: TreatmentFormDat
       
     if (animalFetchError) {
       console.error('Error fetching animal for update:', animalFetchError);
-      // Still return true as the treatment was saved
       return true;
     }
 
-    // Update animal's pen and increment treatment counts
     const updateData: any = {
-      // Always increment the reTreat count when a treatment is added
       re_treat: (animalData?.re_treat || 0) + 1,
     };
     
-    // Only update pen_id if specified
     if (formData.moveTo) {
       updateData.pen_id = formData.moveTo;
     }
@@ -297,12 +280,46 @@ export const saveTreatment = async (animalId: string, formData: TreatmentFormDat
         
     if (animalUpdateError) {
       console.error('Error updating animal data:', animalUpdateError);
-      // We still return true as the treatment was saved
     }
     
     return true;
   } catch (error) {
     console.error('Unexpected error saving treatment:', error);
+    return false;
+  }
+};
+
+export const saveDeathRecord = async (animalId: string, formData: DeathFormData): Promise<boolean> => {
+  try {
+    const { error: deathRecordError } = await supabase
+      .from('animal_deaths')
+      .insert({
+        animal_id: animalId,
+        reason: formData.reason,
+        necropsy: formData.necropsy,
+        death_date: formData.deathDate
+      });
+      
+    if (deathRecordError) {
+      console.error('Error inserting death record:', deathRecordError);
+      return false;
+    }
+    
+    const { error: animalUpdateError } = await supabase
+      .from('animals')
+      .update({
+        status: 'dead'
+      })
+      .eq('id', animalId);
+        
+    if (animalUpdateError) {
+      console.error('Error updating animal status:', animalUpdateError);
+      return true;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Unexpected error saving death record:', error);
     return false;
   }
 };

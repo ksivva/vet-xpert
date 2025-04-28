@@ -1,0 +1,198 @@
+
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import Layout from '../components/Layout';
+import SelectField from '../components/SelectField';
+import { Button } from '@/components/ui/button';
+import { saveDeathRecord, getAnimalById } from '../utils/dataUtils';
+import { useQueryClient } from '@tanstack/react-query';
+
+const DeathReasons = [
+  { value: 'Respiratory Disease', label: 'Respiratory Disease' },
+  { value: 'Digestive Disorder', label: 'Digestive Disorder' },
+  { value: 'Injury', label: 'Injury' },
+  { value: 'Neurological Issue', label: 'Neurological Issue' },
+  { value: 'Metabolic Disease', label: 'Metabolic Disease' },
+  { value: 'Unknown', label: 'Unknown' }
+];
+
+const DeadPage: React.FC = () => {
+  const { animalId } = useParams<{ animalId: string }>();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [animal, setAnimal] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  
+  const [formData, setFormData] = useState({
+    reason: 'Unknown',
+    necropsy: false,
+    deathDate: new Date().toISOString().split('T')[0]
+  });
+
+  useEffect(() => {
+    const fetchAnimal = async () => {
+      if (!animalId) return;
+      
+      try {
+        const animalData = await getAnimalById(animalId);
+        if (animalData) {
+          setAnimal(animalData);
+        } else {
+          toast.error('Animal not found');
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('Error fetching animal:', error);
+        toast.error('Failed to load animal data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAnimal();
+  }, [animalId, navigate]);
+
+  const handleChange = (field: string, value: string | boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!animalId) {
+      toast.error('Animal ID is missing');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      const success = await saveDeathRecord(animalId, {
+        reason: formData.reason,
+        necropsy: formData.necropsy,
+        deathDate: formData.deathDate
+      });
+      
+      if (success) {
+        toast.success('Death record saved successfully');
+        
+        // Invalidate queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ['animal', animalId] });
+        if (animal?.lotId) {
+          queryClient.invalidateQueries({ queryKey: ['animals', animal.lotId] });
+        }
+        if (animal?.penId) {
+          queryClient.invalidateQueries({ queryKey: ['animals', animal.penId] });
+        }
+        
+        // Navigate back to home page
+        navigate('/');
+      } else {
+        toast.error('Failed to save death record');
+      }
+    } catch (error) {
+      console.error('Error in death record submission:', error);
+      toast.error('An error occurred while saving the death record');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancel = () => {
+    navigate('/');
+  };
+
+  if (isLoading) {
+    return (
+      <Layout title="Record Death" showBackButton>
+        <div className="text-center py-10">
+          <p className="text-gray-500">Loading animal data...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout title={`Record Death: ${animal?.visualTag || ''}`} showBackButton>
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-lg font-semibold">Animal Details</h2>
+              <span className={`px-3 py-1 rounded-full text-white ${
+                animal?.pulls > 0 ? 'bg-blue-500' : 'bg-green-500'
+              }`}>
+                {animal?.pulls > 0 ? `Pulls: ${animal?.pulls}` : 'No Pulls'}
+              </span>
+            </div>
+            <p className="text-sm text-gray-500">
+              {animal?.gender} • {animal?.animalEid ? `EID: ${animal.animalEid} •` : ''} DOF: {animal?.daysOnFeed} days
+            </p>
+          </div>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <SelectField
+              id="reason"
+              label="Reason for Death"
+              value={formData.reason}
+              options={DeathReasons}
+              onChange={(value) => handleChange('reason', value)}
+              required
+            />
+            
+            <div className="mb-4">
+              <label htmlFor="deathDate" className="block text-sm font-medium text-gray-700 mb-1">
+                Death Date
+              </label>
+              <input
+                id="deathDate"
+                type="date"
+                value={formData.deathDate}
+                onChange={(e) => handleChange('deathDate', e.target.value)}
+                className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={formData.necropsy}
+                  onChange={(e) => handleChange('necropsy', e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+                />
+                <span className="text-sm font-medium text-gray-700">Necropsy</span>
+              </label>
+            </div>
+            
+            <div className="pt-4 border-t flex space-x-4">
+              <Button
+                type="submit"
+                className="bg-red-600 hover:bg-red-700 text-white"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Saving...' : 'Save Death Record'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Layout>
+  );
+};
+
+export default DeadPage;
