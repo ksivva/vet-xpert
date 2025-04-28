@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Treatment from "./pages/Treatment";
 import Dead from "./pages/Dead";
 import NotFound from "./pages/NotFound";
+import './App.css';
 
 const queryClient = new QueryClient();
 
@@ -28,12 +29,16 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter basename={getBasename()}>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/treatment/:animalId" element={<Treatment />} />
-          <Route path="/dead/:animalId" element={<Dead />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <div className="min-h-screen bg-vetxpert-background">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/treatment/:animalId" element={<Treatment />} />
+              <Route path="/dead/:animalId" element={<Dead />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
+        </div>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
