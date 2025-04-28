@@ -11,13 +11,13 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Use a simpler base URL approach that works across environments
+// Match the base URL from vite.config.ts for GitHub Pages deployment
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter basename="/">
+      <BrowserRouter basename="/vet-xpert">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/treatment/:animalId" element={<Treatment />} />
