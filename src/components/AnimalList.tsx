@@ -29,7 +29,7 @@ const AnimalList: React.FC<AnimalListProps> = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <h2 className="text-lg font-semibold">
         {isSearchResult ? "Search Results" : "Animals"}
       </h2>
