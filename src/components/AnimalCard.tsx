@@ -34,7 +34,7 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
     <Card className="animate-fade-in hover:shadow-lg transition-shadow bg-white shadow-md border-gray-200">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
-          <div className="text-left">
+          <div>
             <h3 className="text-lg sm:text-xl font-bold">{animal.visualTag}</h3>
             <div className="text-gray-500 text-sm">
               {animal.gender}
