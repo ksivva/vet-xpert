@@ -33,7 +33,7 @@ const AnimalList: React.FC<AnimalListProps> = ({
       <h2 className="text-lg font-semibold">
         {isSearchResult ? "Search Results" : "Animals"}
       </h2>
-      <div className="space-y-4">
+      <div className="space-y-6">
         {animals.map(animal => (
           <AnimalCard 
             key={animal.id} 

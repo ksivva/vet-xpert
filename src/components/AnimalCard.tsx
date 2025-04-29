@@ -31,7 +31,7 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
   const isRealized = animal.status === 'realized';
 
   return (
-    <Card className="animate-fade-in hover:shadow-lg transition-shadow">
+    <Card className="animate-fade-in hover:shadow-lg transition-shadow bg-white shadow-md border-gray-200">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
@@ -61,19 +61,19 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
       
       <CardContent className="pt-2">
         <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="bg-gray-50 p-2 rounded">
+          <div className="bg-gray-100 p-2 rounded">
             <p className="text-gray-500 text-xs">DOF (Weeks)</p>
             <p className="font-medium">{getWeekCount(animal.daysOnFeed)}</p>
           </div>
-          <div className="bg-gray-50 p-2 rounded">
+          <div className="bg-gray-100 p-2 rounded">
             <p className="text-gray-500 text-xs">Days to Ship</p>
             <p className="font-medium">{animal.daysToShip}</p>
           </div>
-          <div className="bg-gray-50 p-2 rounded">
+          <div className="bg-gray-100 p-2 rounded">
             <p className="text-gray-500 text-xs">LTD Treatment Cost</p>
             <p className="font-medium">{formatCurrency(animal.ltdTreatmentCost)}</p>
           </div>
-          <div className="bg-gray-50 p-2 rounded">
+          <div className="bg-gray-100 p-2 rounded">
             <p className="text-gray-500 text-xs">Pulls / RePulls</p>
             <p className="font-medium">{animal.pulls} / {animal.rePulls}</p>
           </div>
