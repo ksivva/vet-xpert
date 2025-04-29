@@ -96,9 +96,6 @@ const Layout: React.FC<LayoutProps> = ({
       </header>
       
       <main className="container mx-auto px-4 py-6">
-        {title && (
-          <h1 className="text-2xl font-bold mb-4 text-vetxpert-primary">{title}</h1>
-        )}
         {authError && import.meta.env.DEV && (
           <div className="bg-yellow-50 text-yellow-800 p-4 mb-6 rounded-lg border border-yellow-200">
             <p className="font-medium">Auth warning (dev only)</p>
