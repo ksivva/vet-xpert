@@ -26,7 +26,7 @@ class BluetoothService {
   
   // Check if Web Bluetooth API is available
   isBluetoothAvailable(): boolean {
-    return 'bluetooth' in navigator;
+    return typeof navigator !== 'undefined' && 'bluetooth' in navigator;
   }
   
   // Request a device to connect with
@@ -123,10 +123,12 @@ class BluetoothService {
     }
     
     try {
-      this.characteristic.addEventListener('characteristicvaluechanged', (event) => {
+      // We need to define a handler function that we can later remove
+      const handleValueChange = (event: Event) => {
         // The RS420 typically sends the EID as a string or buffer
         // We need to parse the data according to the device's specific format
-        const value = (event.target as BluetoothRemoteGATTCharacteristic).value;
+        const target = event.target as BluetoothRemoteGATTCharacteristic;
+        const value = target.value;
         if (!value) return;
         
         // Parse the data buffer to extract the EID
@@ -142,7 +144,9 @@ class BluetoothService {
         if (eid) {
           callback(eid);
         }
-      });
+      };
+      
+      this.characteristic.addEventListener('characteristicvaluechanged', handleValueChange);
       
       await this.characteristic.startNotifications();
       console.log('Started scanning for EIDs');

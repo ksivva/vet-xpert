@@ -17,7 +17,9 @@ export const useBluetoothReader = () => {
   
   // Check Bluetooth availability on mount
   useEffect(() => {
-    const isAvailable = bluetoothService.isBluetoothAvailable();
+    // We need to check if we're in a browser environment and if bluetooth is available
+    const isAvailable = typeof navigator !== 'undefined' && 'bluetooth' in navigator && 
+                        bluetoothService.isBluetoothAvailable();
     setState(prev => ({ ...prev, isAvailable }));
     
     if (!isAvailable) {
@@ -27,6 +29,11 @@ export const useBluetoothReader = () => {
   
   // Request device and connect
   const connectToReader = useCallback(async () => {
+    if (!state.isAvailable) {
+      toast.error('Bluetooth is not available on this device/browser');
+      return;
+    }
+    
     try {
       setState(prev => ({ ...prev, connecting: true, error: null }));
       
@@ -75,7 +82,7 @@ export const useBluetoothReader = () => {
       }));
       toast.error('Connection error');
     }
-  }, []);
+  }, [state.isAvailable]);
   
   // Disconnect from reader
   const disconnectFromReader = useCallback(async () => {
