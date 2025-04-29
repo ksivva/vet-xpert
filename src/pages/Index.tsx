@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -127,7 +128,9 @@ const Index: React.FC = () => {
   };
 
   const handleBarcodeScan = () => {
-    const mockScannedEid = `EID-${Math.floor(Math.random() * 10000)}`;
+    // Use realistic sample EIDs from the user requirements
+    const sampleEids = ['EID-ABC9823', 'EID-QR98505'];
+    const mockScannedEid = sampleEids[Math.floor(Math.random() * sampleEids.length)];
     setAnimalEid(mockScannedEid);
     toast.info(`Scanned EID: ${mockScannedEid}`);
   };
