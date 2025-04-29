@@ -16,11 +16,7 @@ const queryClient = new QueryClient();
 // Determine the base path for routing based on environment
 const getBasename = () => {
   // In production, use the vet-xpert path
-  if (import.meta.env.PROD) {
-    return "/vet-xpert";
-  }
-  // In development, use root path
-  return "";
+  return import.meta.env.PROD ? "/vet-xpert" : "";
 };
 
 const App = () => (
