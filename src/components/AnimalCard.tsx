@@ -35,7 +35,7 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-lg sm:text-xl font-bold">{animal.visualTag}</h3>
+            <h3 className="text-lg sm:text-xl font-bold text-blue-600">{animal.visualTag}</h3>
             <div className="text-gray-500 text-sm">
               {animal.gender}
               {animal.animalEid && <span className="ml-2">• EID: {animal.animalEid}</span>}
