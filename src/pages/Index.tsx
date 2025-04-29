@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -60,7 +59,7 @@ const Index: React.FC = () => {
 
   useEffect(() => {
     const fetchAnimals = async () => {
-      if (!selectedLotId || !selectedPenId) {
+      if (searchedAnimal || (!selectedLotId && !selectedPenId)) {
         setFilteredAnimals([]);
         return;
       }
@@ -101,7 +100,7 @@ const Index: React.FC = () => {
     };
 
     fetchAnimals();
-  }, [selectedLotId, selectedPenId]);
+  }, [selectedLotId, selectedPenId, searchedAnimal]);
 
   useEffect(() => {
     localStorage.setItem('selectedLotId', selectedLotId);
@@ -148,7 +147,6 @@ const Index: React.FC = () => {
       if (animal) {
         setSearchedAnimal(animal);
         
-        // Reset location filters as we found the animal by EID
         setSelectedLotId('');
         setSelectedPenId('');
         localStorage.removeItem('selectedLotId');
@@ -166,6 +164,8 @@ const Index: React.FC = () => {
       setIsSearching(false);
     }
   };
+
+  const displayedAnimals = searchedAnimal ? [searchedAnimal] : filteredAnimals;
 
   return (
     <Layout title="VetXpert">
@@ -210,13 +210,6 @@ const Index: React.FC = () => {
               )}
             </Button>
           </div>
-          
-          {searchedAnimal && (
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold mb-2">Search Result</h3>
-              <AnimalCard animal={searchedAnimal} />
-            </div>
-          )}
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-100">
@@ -248,11 +241,13 @@ const Index: React.FC = () => {
           </div>
         </div>
 
-        {filteredAnimals.length > 0 ? (
+        {displayedAnimals.length > 0 ? (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Animals</h2>
+            <h2 className="text-lg font-semibold">
+              {searchedAnimal ? "Search Results" : "Animals"}
+            </h2>
             <div className="space-y-4">
-              {filteredAnimals.map(animal => (
+              {displayedAnimals.map(animal => (
                 <AnimalCard 
                   key={animal.id} 
                   animal={animal}
@@ -261,17 +256,15 @@ const Index: React.FC = () => {
             </div>
           </div>
         ) : (
-          !searchedAnimal && (
-            <div className="text-center py-10">
-              <p className="text-gray-500">
-                {!selectedLotId
-                  ? 'Please select a Lot to view animals.'
-                  : !selectedPenId
-                  ? 'Please select a Pen to view animals.'
-                  : 'No animals found in the selected location.'}
-              </p>
-            </div>
-          )
+          <div className="text-center py-10">
+            <p className="text-gray-500">
+              {!selectedLotId && !searchedAnimal
+                ? 'Please select a Lot to view animals or search by EID.'
+                : !selectedPenId && !searchedAnimal
+                ? 'Please select a Pen to view animals or search by EID.'
+                : 'No animals found.'}
+            </p>
+          </div>
         )}
       </div>
     </Layout>
