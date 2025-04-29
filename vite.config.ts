@@ -28,7 +28,17 @@ export default defineConfig(({ mode }) => ({
         // Ensure proper MIME types are used
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
-        assetFileNames: 'assets/[name].[hash].[ext]'
+        assetFileNames: ({name}) => {
+          if (/\.(js|mjs)$/.test(name ?? '')) {
+            return 'assets/[name].[hash].js';
+          }
+          
+          if (/\.css$/.test(name ?? '')) {
+            return 'assets/[name].[hash].css';
+          }
+          
+          return 'assets/[name].[hash].[ext]';
+        }
       }
     }
   }
