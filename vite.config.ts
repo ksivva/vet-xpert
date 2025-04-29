@@ -29,12 +29,16 @@ export default defineConfig(({ mode }) => ({
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
         assetFileNames: ({name}) => {
+          if (/\.(gif|jpe?g|png|svg)$/.test(name ?? '')) {
+            return 'assets/images/[name].[hash].[ext]';
+          }
+          
           if (/\.(js|mjs)$/.test(name ?? '')) {
-            return 'assets/[name].[hash].js';
+            return 'assets/js/[name].[hash].js';
           }
           
           if (/\.css$/.test(name ?? '')) {
-            return 'assets/[name].[hash].css';
+            return 'assets/css/[name].[hash].css';
           }
           
           return 'assets/[name].[hash].[ext]';

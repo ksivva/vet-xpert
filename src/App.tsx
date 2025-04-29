@@ -14,7 +14,6 @@ import './App.css';
 const queryClient = new QueryClient();
 
 // Determine the base path for routing based on environment
-// Remove trailing slash for proper route handling
 const getBasename = () => {
   // In production, use the vet-xpert path
   if (import.meta.env.PROD) {
