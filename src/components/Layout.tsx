@@ -4,6 +4,7 @@ import Logo from './Logo';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
+import { ChevronLeft } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -73,7 +74,7 @@ const Layout: React.FC<LayoutProps> = ({
   // Always render the layout, even if auth is still loading
   return (
     <div className="min-h-screen bg-vetxpert-background">
-      <header className="bg-vetxpert-primary shadow-sm sticky top-0 z-10">
+      <header className="bg-vetxpert-blue shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           {showBackButton ? (
             <button 
@@ -81,23 +82,25 @@ const Layout: React.FC<LayoutProps> = ({
               className="text-white"
               aria-label="Go back"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m15 18-6-6 6-6"/>
-              </svg>
+              <ChevronLeft className="h-5 w-5" />
             </button>
           ) : (
-            <div className="w-6"></div>
+            <div className="w-5"></div>
           )}
           
           <Logo />
           
-          <div className="w-6"></div>
+          <div className="w-5"></div>
         </div>
       </header>
       
       <main className="container mx-auto px-4 py-6">
+        {title && (
+          <h1 className="text-2xl font-bold text-vetxpert-dark mb-6">{title}</h1>
+        )}
+        
         {authError && import.meta.env.DEV && (
-          <div className="bg-yellow-50 text-yellow-800 p-4 mb-6 rounded-lg border border-yellow-200">
+          <div className="bg-amber-50 text-amber-800 p-4 mb-6 rounded-lg border border-amber-200">
             <p className="font-medium">Auth warning (dev only)</p>
             <p className="text-sm">The app continues to work in limited mode: {authError}</p>
           </div>
