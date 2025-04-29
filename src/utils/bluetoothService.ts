@@ -127,8 +127,10 @@ class BluetoothService {
       const handleValueChange = (event: Event) => {
         // The RS420 typically sends the EID as a string or buffer
         // We need to parse the data according to the device's specific format
-        const target = event.target as BluetoothRemoteGATTCharacteristic;
-        const value = target.value;
+        // First, ensure the event target is a BluetoothRemoteGATTCharacteristic
+        const characteristic = event.target as unknown as BluetoothRemoteGATTCharacteristic;
+        const value = characteristic.value;
+        
         if (!value) return;
         
         // Parse the data buffer to extract the EID
