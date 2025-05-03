@@ -15,6 +15,7 @@ export type Database = {
           created_at: string
           death_date: string
           id: string
+          image_path: string | null
           necropsy: boolean
           reason: string
         }
@@ -23,6 +24,7 @@ export type Database = {
           created_at?: string
           death_date?: string
           id?: string
+          image_path?: string | null
           necropsy?: boolean
           reason: string
         }
@@ -31,6 +33,7 @@ export type Database = {
           created_at?: string
           death_date?: string
           id?: string
+          image_path?: string | null
           necropsy?: boolean
           reason?: string
         }
