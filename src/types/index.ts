@@ -1,3 +1,4 @@
+
 export interface Animal {
   id: string;
   visualTag: string;
@@ -51,6 +52,7 @@ export interface DeathFormData {
   necropsy: boolean;
   deathDate: string;
   image?: File | null;
+  imageUrl?: string | null;
 }
 
 export type Severity = 'Critical' | 'Medium' | 'Low';

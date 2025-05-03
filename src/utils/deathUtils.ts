@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { DeathFormData } from '../types';
+import { toast } from "sonner";
 
 export const getDeathRecordByAnimalId = async (animalId: string): Promise<DeathFormData | null> => {
   try {
@@ -27,7 +28,8 @@ export const getDeathRecordByAnimalId = async (animalId: string): Promise<DeathF
     
     // Get image URL if it exists
     let imageUrl = null;
-    if (data.image_path) {
+    // Check if image_path exists as a property on data using hasOwnProperty
+    if (data && Object.prototype.hasOwnProperty.call(data, 'image_path') && data.image_path) {
       const { data: imageData } = await supabase
         .storage
         .from('animal_deaths')
