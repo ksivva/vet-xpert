@@ -28,8 +28,7 @@ export const getDeathRecordByAnimalId = async (animalId: string): Promise<DeathF
     
     // Get image URL if it exists
     let imageUrl = null;
-    // Check if image_path exists as a property on data using hasOwnProperty
-    if (data && Object.prototype.hasOwnProperty.call(data, 'image_path') && data.image_path) {
+    if (data && data.image_path) {
       const { data: imageData } = await supabase
         .storage
         .from('animal_deaths')
@@ -65,32 +64,7 @@ export const saveDeathRecord = async (animalId: string, formData: DeathFormData)
       
       console.log('Uploading image:', filePath);
       
-      // Ensure storage bucket exists
-      const { data: bucketData, error: bucketError } = await supabase
-        .storage
-        .getBucket('animal_deaths');
-        
-      if (bucketError) {
-        // Create bucket if it doesn't exist
-        if (bucketError.message.includes('does not exist')) {
-          const { error: createError } = await supabase
-            .storage
-            .createBucket('animal_deaths', {
-              public: true,
-              fileSizeLimit: 10485760 // 10MB
-            });
-            
-          if (createError) {
-            console.error('Error creating bucket:', createError);
-            return false;
-          }
-        } else {
-          console.error('Error checking bucket:', bucketError);
-          return false;
-        }
-      }
-      
-      // Upload image
+      // Upload image directly - no need to check if bucket exists, we just created it
       const { error: uploadError } = await supabase
         .storage
         .from('animal_deaths')
@@ -133,6 +107,7 @@ export const saveDeathRecord = async (animalId: string, formData: DeathFormData)
         
       if (updateError) {
         console.error('Error updating death record:', updateError);
+        toast.error('Failed to update death record');
         return false;
       }
       
@@ -153,6 +128,7 @@ export const saveDeathRecord = async (animalId: string, formData: DeathFormData)
         
       if (deathRecordError) {
         console.error('Error inserting death record:', deathRecordError);
+        toast.error('Failed to create death record');
         return false;
       }
       
@@ -177,6 +153,7 @@ export const saveDeathRecord = async (animalId: string, formData: DeathFormData)
     return true;
   } catch (error) {
     console.error('Unexpected error saving death record:', error);
+    toast.error('An unexpected error occurred');
     return false;
   }
 };
