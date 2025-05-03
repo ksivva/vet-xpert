@@ -24,10 +24,25 @@ export const getDeathRecordByAnimalId = async (animalId: string): Promise<DeathF
     }
     
     console.log('Found death record:', data);
+    
+    // Get image URL if it exists
+    let imageUrl = null;
+    if (data.image_path) {
+      const { data: imageData } = await supabase
+        .storage
+        .from('animal_deaths')
+        .getPublicUrl(data.image_path);
+        
+      if (imageData) {
+        imageUrl = imageData.publicUrl;
+      }
+    }
+    
     return {
       reason: data.reason,
       necropsy: data.necropsy,
-      deathDate: data.death_date
+      deathDate: data.death_date,
+      imageUrl: imageUrl
     };
   } catch (error) {
     console.error('Exception fetching death record:', error);
@@ -39,6 +54,55 @@ export const saveDeathRecord = async (animalId: string, formData: DeathFormData)
   try {
     console.log('Saving death record for animal ID:', animalId, formData);
     
+    // Handle image upload if there is one
+    let imagePath = null;
+    if (formData.image) {
+      const fileExt = formData.image.name.split('.').pop();
+      const fileName = `${animalId}_${Date.now()}.${fileExt}`;
+      const filePath = `${animalId}/${fileName}`;
+      
+      console.log('Uploading image:', filePath);
+      
+      // Ensure storage bucket exists
+      const { data: bucketData, error: bucketError } = await supabase
+        .storage
+        .getBucket('animal_deaths');
+        
+      if (bucketError) {
+        // Create bucket if it doesn't exist
+        if (bucketError.message.includes('does not exist')) {
+          const { error: createError } = await supabase
+            .storage
+            .createBucket('animal_deaths', {
+              public: true,
+              fileSizeLimit: 10485760 // 10MB
+            });
+            
+          if (createError) {
+            console.error('Error creating bucket:', createError);
+            return false;
+          }
+        } else {
+          console.error('Error checking bucket:', bucketError);
+          return false;
+        }
+      }
+      
+      // Upload image
+      const { error: uploadError } = await supabase
+        .storage
+        .from('animal_deaths')
+        .upload(filePath, formData.image);
+        
+      if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        toast.error('Failed to upload image');
+        return false;
+      }
+      
+      imagePath = filePath;
+    }
+    
     const { data: existingRecord } = await supabase
       .from('animal_deaths')
       .select('id')
@@ -48,13 +112,21 @@ export const saveDeathRecord = async (animalId: string, formData: DeathFormData)
     if (existingRecord) {
       // Update existing record
       console.log('Updating existing death record ID:', existingRecord.id);
+      
+      let updateData: any = {
+        reason: formData.reason,
+        necropsy: formData.necropsy,
+        death_date: formData.deathDate
+      };
+      
+      // Only update the image path if a new image was uploaded
+      if (imagePath) {
+        updateData.image_path = imagePath;
+      }
+      
       const { error: updateError } = await supabase
         .from('animal_deaths')
-        .update({
-          reason: formData.reason,
-          necropsy: formData.necropsy,
-          death_date: formData.deathDate
-        })
+        .update(updateData)
         .eq('id', existingRecord.id);
         
       if (updateError) {
@@ -66,13 +138,15 @@ export const saveDeathRecord = async (animalId: string, formData: DeathFormData)
     } else {
       // Insert new record
       console.log('Creating new death record');
+      
       const { error: deathRecordError } = await supabase
         .from('animal_deaths')
         .insert({
           animal_id: animalId,
           reason: formData.reason,
           necropsy: formData.necropsy,
-          death_date: formData.deathDate
+          death_date: formData.deathDate,
+          image_path: imagePath
         });
         
       if (deathRecordError) {
